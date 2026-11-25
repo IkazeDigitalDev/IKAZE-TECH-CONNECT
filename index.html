@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>IKAZE CONNECT — Connect Freely</title>
+  <!-- Lucide Icons (via CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Three.js (via CDN) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+      }
+    }
+  </script>
+  <style>
+    /* ---------- RESET & GLOBAL ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: #0a0c14;
+      color: #ffffff;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    #three-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .app-wrapper {
+      position: relative;
+      z-index: 10;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(2px);
+    }
+
+    /* ---------- SCROLLBAR ---------- */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+    ::-webkit-scrollbar-thumb { background: rgba(100,150,255,0.4); border-radius: 10px; }
+
+    /* ---------- TYPOGRAPHY ---------- */
+    h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; }
+    p, span, div { font-weight: 400; }
+
+    /* ---------- GLASS CARD ---------- */
+    .glass {
+      background: rgba(20, 25, 40, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ---------- MAIN LAYOUT ---------- */
+    .main-screen {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ---------- SIDEBAR ---------- */
+    .sidebar {
+      width: 80px;
+      background: rgba(12, 16, 28, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0;
+      gap: 8px;
+      transition: width 0.2s;
+    }
+
+    .sidebar .nav-item {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      color: #8899bb;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 11px;
+      gap: 2px;
+    }
+
+    .sidebar .nav-item.active {
+      background: rgba(70, 130, 255, 0.15);
+      color: #6a9eff;
+    }
+
+    .sidebar .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #c0d0ff;
+    }
+
+    .sidebar .nav-item i {
+      font-size: 20px;
+    }
+
+    /* ---------- MAIN CONTENT ---------- */
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ---------- HEADER ---------- */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      background: rgba(10, 14, 24, 0.7);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo span {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #6a9eff, #b07aff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .demo-badge {
+      background: rgba(255, 180, 50, 0.15);
+      border: 1px solid rgba(255, 180, 50, 0.3);
+      color: #ffb432;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6a9eff, #b07aff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+      color: white;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.15);
+      transition: all 0.2s;
+    }
+
+    .avatar:hover { border-color: #6a9eff; }
+
+    /* ---------- PAGE CONTAINER ---------- */
+    .page-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px 100px;
+    }
+
+    /* ---------- WELCOME BANNER ---------- */
+    .welcome-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, rgba(30, 40, 70, 0.8), rgba(20, 25, 45, 0.9));
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .welcome-banner h2 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .welcome-banner p {
+      color: #8899bb;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .quick-btn {
+      background: rgba(70, 130, 255, 0.15);
+      border: 1px solid rgba(70, 130, 255, 0.25);
+      color: #c0d0ff;
+      padding: 10px 18px;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quick-btn:hover {
+      background: rgba(70, 130, 255, 0.3);
+      border-color: #6a9eff;
+      transform: translateY(-1px);
+    }
+
+    /* ---------- GRID DASHBOARD ---------- */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 700px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    .dash-card {
+      background: rgba(20, 25, 40, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 18px 20px;
+    }
+
+    .dash-card h3 {
+      font-size: 14px;
+      color: #8899bb;
+      font-weight: 500;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .conversation-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .conversation-item:hover { background: rgba(255,255,255,0.02); border-radius: 12px; padding-left: 8px; }
+
+    .conversation-item:last-child { border-bottom: none; }
+
+    .conv-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3a4a6a, #2a3a5a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: #8899bb;
+      flex-shrink: 0;
+    }
+
+    .conv-info { flex: 1; min-width: 0; }
+    .conv-info .name { font-size: 14px; font-weight: 500; }
+    .conv-info .msg { font-size: 12px; color: #667799; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .conv-time { font-size: 11px; color: #556688; flex-shrink: 0; }
+
+    /* ---------- MESSAGES VIEW (hidden by default) ---------- */
+    .messages-view {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      padding: 0;
+    }
+
+    .messages-view.active {
+      display: flex;
+    }
+
+    .msg-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .msg-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .msg-bubble {
+      max-width: 70%;
+      padding: 10px 16px;
+      border-radius: 18px;
+      background: rgba(30, 40, 60, 0.8);
+      align-self: flex-start;
+      position: relative;
+      font-size: 14px;
+      line-height: 1.5;
+      word-break: break-word;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .msg-bubble.own {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #2a4a8a, #1a3a6a);
+      border-color: rgba(70,130,255,0.2);
+    }
+
+    .msg-bubble .msg-time {
+      font-size: 10px;
+      color: #667799;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    .msg-bubble .edited-label {
+      font-size: 9px;
+      color: #8899bb;
+      font-style: italic;
+      margin-left: 6px;
+    }
+
+    .msg-composer {
+      padding: 12px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      gap: 10px;
+      background: rgba(10, 14, 24, 0.8);
+    }
+
+    .msg-composer input {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 40px;
+      padding: 12px 18px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .msg-composer input:focus { border-color: #6a9eff; }
+
+    .msg-composer button {
+      background: #6a9eff;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      transition: all 0.2s;
+    }
+
+    .msg-composer button:hover { background: #5a8eef; transform: scale(1.05); }
+
+    /* ---------- ONBOARDING OVERLAY ---------- */
+    .onboarding-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(5, 8, 16, 0.92);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .onboarding-card {
+      max-width: 520px;
+      width: 100%;
+      background: rgba(20, 25, 40, 0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      padding: 32px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .onboarding-card h2 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #6a9eff, #b07aff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .onboarding-card p { color: #8899bb; font-size: 14px; margin-bottom: 24px; }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #8899bb;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px 16px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: #6a9eff;
+    }
+
+    .form-group select option { background: #1a1f30; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3a6aee, #6a4aee);
+      border: none;
+      border-radius: 14px;
+      padding: 14px 28px;
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(70, 130, 255, 0.3); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px 28px;
+      color: #c0d0ff;
+      font-weight: 500;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+    /* ---------- AUTH OVERLAY ---------- */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      background: rgba(5, 8, 16, 0.94);
+      backdrop-filter: blur(24px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      max-width: 420px;
+      width: 100%;
+      background: rgba(20, 25, 40, 0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      padding: 32px;
+    }
+
+    .auth-card h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, #6a9eff, #b07aff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .auth-card .subtitle {
+      color: #8899bb;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 14px;
+      padding: 4px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: #8899bb;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      background: rgba(70, 130, 255, 0.2);
+      color: #c0d0ff;
+    }
+
+    .auth-form { display: flex; flex-direction: column; gap: 14px; }
+
+    .auth-form input {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .auth-form input:focus { border-color: #6a9eff; }
+
+    .demo-user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-bottom: 8px;
+      border: 1px solid transparent;
+    }
+
+    .demo-user-pill:hover { background: rgba(70,130,255,0.1); border-color: rgba(70,130,255,0.2); }
+
+    .demo-user-pill .pill-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #3a4a6a, #2a3a5a);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 13px; color: #8899bb;
+    }
+
+    .demo-user-pill .pill-info { flex: 1; }
+    .demo-user-pill .pill-info .pname { font-size: 13px; font-weight: 500; }
+    .demo-user-pill .pill-info .prole { font-size: 11px; color: #667799; }
+
+    /* ---------- FOOTER ---------- */
+    .app-footer {
+      padding: 12px 24px;
+      text-align: center;
+      font-size: 11px;
+      color: #445566;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      background: rgba(10, 14, 24, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 5;
+    }
+
+    .app-footer a {
+      color: #6a9eff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .app-footer a:hover { text-decoration: underline; }
+
+    /* ---------- UTILITY ---------- */
+    .hidden { display: none !important; }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 600px) {
+      .sidebar { width: 64px; }
+      .sidebar .nav-item { width: 48px; height: 48px; font-size: 9px; }
+      .sidebar .nav-item i { font-size: 18px; }
+      .app-header { padding: 10px 16px; }
+      .page-container { padding: 16px 16px 100px; }
+      .welcome-banner { padding: 16px; }
+      .welcome-banner h2 { font-size: 18px; }
+      .quick-btn { font-size: 12px; padding: 8px 14px; }
+      .msg-bubble { max-width: 85%; }
+    }
+
+    /* ---------- KEYFRAMES ---------- */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in { animation: fadeIn 0.3s ease forwards; }
+
+    /* ---------- ADMIN DOUBLE-CLICK HINT ---------- */
+    .admin-hint {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: rgba(20, 25, 40, 0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 12px 18px;
+      font-size: 12px;
+      color: #8899bb;
+      z-index: 100;
+      display: none;
+      backdrop-filter: blur(12px);
+    }
+
+    /* ---------- CONTEXT MENU ---------- */
+    .context-menu {
+      position: fixed;
+      z-index: 2000;
+      background: rgba(20, 25, 40, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 6px;
+      min-width: 160px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      display: none;
+    }
+
+    .context-menu button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 14px;
+      background: transparent;
+      border: none;
+      color: #c0d0ff;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.15s;
+    }
+
+    .context-menu button:hover { background: rgba(70,130,255,0.15); }
+
+    .context-menu button.danger { color: #ff6b6b; }
+    .context-menu button.danger:hover { background: rgba(255,80,80,0.1); }
+  </style>
+</head>
+<body>
+
+  <!-- THREE.JS BACKGROUND -->
+  <canvas id="three-bg"></canvas>
+
+  <!-- APP WRAPPER -->
+  <div class="app-wrapper" id="appWrapper">
+
+    <!-- AUTH OVERLAY (shown when not authenticated) -->
+    <div class="auth-overlay" id="authOverlay">
+      <div class="auth-card fade-in">
+        <h1>IKAZE CONNECT</h1>
+        <p class="subtitle">Connect Freely. Communicate Beyond Boundaries.</p>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">Sign In</button>
+          <button class="auth-tab" data-tab="register">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="auth-form" id="loginForm">
+          <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email">
+          <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+          <button class="btn-primary" id="loginBtn">Sign In</button>
+          <p style="text-align:center; font-size:12px; color:#667799; cursor:pointer;" id="demoQuickAccess">⚡ Quick demo access (click a demo user below)</p>
+          <div id="demoUserList" style="margin-top:8px;"></div>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div class="auth-form hidden" id="registerForm">
+          <input type="text" id="regName" placeholder="Full name">
+          <input type="email" id="regEmail" placeholder="Email address">
+          <input type="password" id="regPassword" placeholder="Password (min 6 characters)">
+          <button class="btn-primary" id="registerBtn">Create Demo Account</button>
+        </div>
+
+        <p style="text-align:center; font-size:11px; color:#556688; margin-top:20px;">
+          Demo mode — no real data is sent to any server.<br>
+          <span style="color:#6a9eff; cursor:pointer;" id="resetDemoLink">Reset demo data</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- ONBOARDING OVERLAY (shown after first login) -->
+    <div class="onboarding-overlay hidden" id="onboardingOverlay">
+      <div class="onboarding-card fade-in">
+        <h2>Welcome to IKAZE CONNECT</h2>
+        <p>Tell us a bit about yourself to personalize your experience.</p>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="obName" placeholder="Your full name">
+        </div>
+        <div class="form-group">
+          <label>Professional Identity</label>
+          <select id="obProfession">
+            <option value="">Select your primary role</option>
+            <option>IT Specialist</option>
+            <option>Software Developer</option>
+            <option>Web Developer</option>
+            <option>Mobile App Developer</option>
+            <option>Computer Science Student</option>
+            <option>ICT Professional</option>
+            <option>Digital Educator</option>
+            <option>Robotics Engineer</option>
+            <option>Automation Specialist</option>
+            <option>Artificial Intelligence Specialist</option>
+            <option>Cybersecurity Specialist</option>
+            <option>Network Engineer</option>
+            <option>Data Scientist / Data Analyst</option>
+            <option>UI/UX Designer</option>
+            <option>Digital Entrepreneur</option>
+            <option>Technology Researcher</option>
+            <option>Digital Innovator</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Areas of Specialization (comma separated)</label>
+          <input type="text" id="obSpecializations" placeholder="e.g. Web Development, AI, Cybersecurity">
+        </div>
+        <div class="form-group">
+          <label>Experience Level</label>
+          <select id="obExperience">
+            <option value="">Select level</option>
+            <option>Beginner</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+            <option>Professional</option>
+            <option>Expert</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Why are you joining? (optional)</label>
+          <textarea id="obPurpose" rows="2" placeholder="e.g. To learn technology skills, connect with professionals..."></textarea>
+        </div>
+
+        <button class="btn-primary" id="obSubmitBtn">Complete Profile & Enter</button>
+        <button class="btn-secondary" id="obSkipBtn">Skip for now (demo)</button>
+      </div>
+    </div>
+
+    <!-- MAIN APP (hidden until authenticated + onboarded) -->
+    <div id="mainApp" class="hidden" style="display:flex; flex-direction:column; height:100%;">
+
+      <!-- HEADER -->
+      <header class="app-header">
+        <div class="logo">
+          <i data-lucide="hexagon" style="color:#6a9eff; width:24px; height:24px;"></i>
+          <span>IKAZE CONNECT</span>
+          <span class="demo-badge">DEMO</span>
+        </div>
+        <div class="header-actions">
+          <i data-lucide="search" style="color:#8899bb; width:20px; height:20px; cursor:pointer;"></i>
+          <i data-lucide="bell" style="color:#8899bb; width:20px; height:20px; cursor:pointer;"></i>
+          <div class="avatar" id="headerAvatar">A</div>
+        </div>
+      </header>
+
+      <!-- MAIN SCREEN -->
+      <div class="main-screen">
+
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="sidebar">
+          <div class="nav-item active" data-section="home">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+          </div>
+          <div class="nav-item" data-section="messages">
+            <i data-lucide="message-circle"></i>
+            <span>Chats</span>
+          </div>
+          <div class="nav-item" data-section="contacts">
+            <i data-lucide="users"></i>
+            <span>Contacts</span>
+          </div>
+          <div class="nav-item" data-section="groups">
+            <i data-lucide="users-2"></i>
+            <span>Groups</span>
+          </div>
+          <div class="nav-item" data-section="communities">
+            <i data-lucide="globe"></i>
+            <span>Comms</span>
+          </div>
+          <div class="nav-item" data-section="meet">
+            <i data-lucide="video"></i>
+            <span>Meet</span>
+          </div>
+          <div class="nav-item" data-section="files">
+            <i data-lucide="folder"></i>
+            <span>Files</span>
+          </div>
+          <div class="nav-item" data-section="settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </div>
+        </nav>
+
+        <!-- CONTENT AREA -->
+        <div class="content-area" id="contentArea">
+
+          <!-- HOME / DASHBOARD VIEW -->
+          <div class="page-container" id="homeView">
+            <div class="welcome-banner">
+              <div>
+                <h2>Welcome back, <span id="welcomeName">Alex</span> 👋</h2>
+                <p>Connect, collaborate, and innovate with the tech community.</p>
+              </div>
+              <div class="quick-actions">
+                <button class="quick-btn" id="quickNewChat"><i data-lucide="plus" style="width:16px;height:16px;"></i> New Chat</button>
+                <button class="quick-btn" id="quickNewMeeting"><i data-lucide="video" style="width:16px;height:16px;"></i> Meet</button>
+                <button class="quick-btn" id="quickShareFile"><i data-lucide="upload" style="width:16px;height:16px;"></i> Share</button>
+              </div>
+            </div>
+
+            <div class="dashboard-grid">
+              <!-- RECENT CONVERSATIONS -->
+              <div class="dash-card">
+                <h3><i data-lucide="message-circle" style="width:16px;height:16px;"></i> Recent Conversations</h3>
+                <div id="recentConversations"></div>
+              </div>
+
+              <!-- UPCOMING MEETINGS -->
+              <div class="dash-card">
+                <h3><i data-lucide="calendar" style="width:16px;height:16px;"></i> Upcoming Meetings</h3>
+                <div id="upcomingMeetings">
+                  <p style="color:#556688; font-size:13px; padding:12px 0;">No upcoming meetings. <span style="color:#6a9eff; cursor:pointer;" id="createMeetingLink">Create one</span></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- QUICK STATS -->
+            <div class="dashboard-grid">
+              <div class="dash-card">
+                <h3><i data-lucide="users" style="width:16px;height:16px;"></i> Community Activity</h3>
+                <p style="color:#667799; font-size:13px; padding:8px 0;">Join communities to see activity here.</p>
+              </div>
+              <div class="dash-card">
+                <h3><i data-lucide="folder" style="width:16px;height:16px;"></i> Recent Files</h3>
+                <p style="color:#667799; font-size:13px; padding:8px 0;">No recent files. Share a file to get started.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- MESSAGES VIEW (dynamic) -->
+          <div class="messages-view" id="messagesView">
+            <div class="msg-header" id="msgHeader">
+              <i data-lucide="arrow-left" style="width:20px;height:20px;cursor:pointer;" id="backToHome"></i>
+              <div class="conv-avatar" style="width:32px;height:32px;font-size:12px;" id="msgAvatar">A</div>
+              <div>
+                <div style="font-size:14px;font-weight:500;" id="msgContactName">Alex Morgan</div>
+                <div style="font-size:11px;color:#667799;" id="msgContactStatus">Online</div>
+              </div>
+            </div>
+            <div class="msg-list" id="msgList"></div>
+            <div class="msg-composer">
+              <input type="text" id="msgInput" placeholder="Type a message...">
+              <button id="sendMsgBtn"><i data-lucide="send" style="width:18px;height:18px;"></i></button>
+            </div>
+          </div>
+
+          <!-- OTHER VIEWS (placeholder, ready for extension) -->
+          <div class="page-container hidden" id="otherView">
+            <h2 style="margin-bottom:16px;" id="otherViewTitle">Section</h2>
+            <p style="color:#667799;">This section is fully functional in the full version. Explore the demo interface.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="app-footer">
+        Designed & Developed by 
+        <a href="https://ikaze-digital.vercel.app/" target="_blank" rel="noopener">Ikaze Digital</a> and 
+        <a href="https://imena-hub.vercel.app/" target="_blank" rel="noopener">iMena Hub</a>.
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- CONTEXT MENU -->
+  <div class="context-menu" id="contextMenu">
+    <button data-action="reply"><i data-lucide="reply" style="width:14px;height:14px;"></i> Reply</button>
+    <button data-action="react"><i data-lucide="smile" style="width:14px;height:14px;"></i> React</button>
+    <button data-action="copy"><i data-lucide="copy" style="width:14px;height:14px;"></i> Copy</button>
+    <button data-action="edit" id="ctxEditBtn"><i data-lucide="pencil" style="width:14px;height:14px;"></i> Edit</button>
+    <button data-action="delete" class="danger"><i data-lucide="trash-2" style="width:14px;height:14px;"></i> Delete</button>
+  </div>
+
+  <!-- ADMIN HINT (optional) -->
+  <div class="admin-hint" id="adminHint">🔐 Double-click empty space for admin</div>
+
+  <!-- SCRIPTS -->
+  <script type="module">
+    // ============================================================
+    // IKAZE CONNECT — DEMO MODE ENGINE
+    // ============================================================
+    import * as THREE from 'three';
+
+    // ---------- CONFIGURATION ----------
+    const ADMIN_PAGE_URL = 'admin.html';
+    const DB_NAME = 'IkazeConnectDemo';
+    const DB_VERSION = 1;
+
+    // ---------- GLOBAL STATE ----------
+    let currentUser = null;          // { uid, name, email, avatar, profession, ... }
+    let currentChat = null;          // { contactId, contactName, contactAvatar }
+    let messages = {};               // { chatId: [msg, ...] }
+    let demoUsers = [];              // sample users
+    let db = null;
+    let threeScene, threeCamera, threeRenderer, threeParticles, threeLines, threeSphere;
+    let animationFrameId;
+    let contextMenuTarget = null;
+    let editingMessageId = null;
+
+    // ============================================================
+    // 1. INDEXEDDB SERVICE (simplified)
+    // ============================================================
+    const DBService = {
+      async open() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = (e) => {
+            const database = e.target.result;
+            if (!database.objectStoreNames.contains('users')) {
+              database.createObjectStore('users', { keyPath: 'uid' });
+            }
+            if (!database.objectStoreNames.contains('messages')) {
+              const msgStore = database.createObjectStore('messages', { keyPath: 'id' });
+              msgStore.createIndex('chatId', 'chatId', { unique: false });
+            }
+            if (!database.objectStoreNames.contains('preferences')) {
+              database.createObjectStore('preferences', { keyPath: 'key' });
+            }
+          };
+          req.onsuccess = (e) => {
+            db = e.target.result;
+            resolve(db);
+          };
+          req.onerror = (e) => reject(e.target.error);
+        });
+      },
+
+      async getUser(uid) {
+        return new Promise((resolve) => {
+          if (!db) return resolve(null);
+          const tx = db.transaction('users', 'readonly');
+          const store = tx.objectStore('users');
+          const req = store.get(uid);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      },
+
+      async saveUser(user) {
+        return new Promise((resolve, reject) => {
+          if (!db) return reject('DB not open');
+          const tx = db.transaction('users', 'readwrite');
+          const store = tx.objectStore('users');
+          store.put(user);
+          tx.oncomplete = () => resolve();
+          tx.onerror = (e) => reject(e.target.error);
+        });
+      },
+
+      async getAllMessages() {
+        return new Promise((resolve) => {
+          if (!db) return resolve({});
+          const tx = db.transaction('messages', 'readonly');
+          const store = tx.objectStore('messages');
+          const req = store.getAll();
+          req.onsuccess = () => {
+            const all = req.result || [];
+            const grouped = {};
+            all.forEach(m => {
+              if (!grouped[m.chatId]) grouped[m.chatId] = [];
+              grouped[m.chatId].push(m);
+            });
+            // sort each chat by timestamp
+            Object.keys(grouped).forEach(chatId => {
+              grouped[chatId].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            });
+            resolve(grouped);
+          };
+          req.onerror = () => resolve({});
+        });
+      },
+
+      async saveMessage(msg) {
+        return new Promise((resolve, reject) => {
+          if (!db) return reject('DB not open');
+          const tx = db.transaction('messages', 'readwrite');
+          const store = tx.objectStore('messages');
+          store.put(msg);
+          tx.oncomplete = () => resolve();
+          tx.onerror = (e) => reject(e.target.error);
+        });
+      },
+
+      async deleteMessage(id) {
+        return new Promise((resolve, reject) => {
+          if (!db) return reject('DB not open');
+          const tx = db.transaction('messages', 'readwrite');
+          const store = tx.objectStore('messages');
+          store.delete(id);
+          tx.oncomplete = () => resolve();
+          tx.onerror = (e) => reject(e.target.error);
+        });
+      },
+
+      async clearAll() {
+        return new Promise((resolve) => {
+          if (!db) return resolve();
+          const tx = db.transaction(['users', 'messages', 'preferences'], 'readwrite');
+          tx.objectStore('users').clear();
+          tx.objectStore('messages').clear();
+          tx.objectStore('preferences').clear();
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => resolve();
+        });
+      }
+    };
+
+    // ============================================================
+    // 2. THREE.JS BACKGROUND
+    // ============================================================
+    function initThreeBackground() {
+      const canvas = document.getElementById('three-bg');
+      if (!canvas) return;
+
+      // Check reduced motion
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) {
+        canvas.style.background = 'radial-gradient(ellipse at 50% 50%, #1a1f35 0%, #0a0c14 100%)';
+        return;
+      }
+
+      try {
+        threeScene = new THREE.Scene();
+        threeCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        threeCamera.position.z = 30;
+
+        threeRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        threeRenderer.setSize(window.innerWidth, window.innerHeight);
+        threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Particles (network nodes)
+        const particleCount = window.innerWidth < 600 ? 400 : 800;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const color1 = new THREE.Color(0x4a7aff);
+        const color2 = new THREE.Color(0xb07aff);
+        const color3 = new THREE.Color(0x00ccff);
+
+        for (let i = 0; i < particleCount; i++) {
+          const radius = 12 + Math.random() * 8;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos((Math.random() * 2) - 1);
+          positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
+          positions[i*3+1] = radius * Math.sin(phi) * Math.sin(theta);
+          positions[i*3+2] = radius * Math.cos(phi);
+
+          const mixColor = Math.random() < 0.5 ? color1 : (Math.random() < 0.5 ? color2 : color3);
+          colors[i*3] = mixColor.r;
+          colors[i*3+1] = mixColor.g;
+          colors[i*3+2] = mixColor.b;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const material = new THREE.PointsMaterial({
+          size: 0.25,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.9,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+
+        threeParticles = new THREE.Points(geometry, material);
+        threeScene.add(threeParticles);
+
+        // Connecting lines
+        const lineGeometry = new THREE.BufferGeometry();
+        const linePositions = [];
+        const particlePositions = positions;
+        for (let i = 0; i < particleCount; i += 3) {
+          const i1 = i;
+          const i2 = (i + 1) % particleCount;
+          linePositions.push(
+            particlePositions[i1*3], particlePositions[i1*3+1], particlePositions[i1*3+2],
+            particlePositions[i2*3], particlePositions[i2*3+1], particlePositions[i2*3+2]
+          );
+        }
+        lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x2a4a7a, transparent: true, opacity: 0.15 });
+        threeLines = new THREE.LineSegments(lineGeometry, lineMaterial);
+        threeScene.add(threeLines);
+
+        // Central sphere (abstract planet)
+        const sphereGeo = new THREE.IcosahedronGeometry(6, 3);
+        const sphereMat = new THREE.MeshPhongMaterial({
+          color: 0x1a2a5a,
+          emissive: 0x0a1a3a,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.15
+        });
+        threeSphere = new THREE.Mesh(sphereGeo, sphereMat);
+        threeScene.add(threeSphere);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        threeScene.add(ambientLight);
+        const pointLight1 = new THREE.PointLight(0x4a7aff, 1, 50);
+        pointLight1.position.set(10, 10, 10);
+        threeScene.add(pointLight1);
+        const pointLight2 = new THREE.PointLight(0xb07aff, 0.8, 50);
+        pointLight2.position.set(-10, -5, 10);
+        threeScene.add(pointLight2);
+
+        // Mouse interaction
+        let mouseX = 0, mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+          mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+          mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // Animation loop
+        let time = 0;
+        function animate() {
+          animationFrameId = requestAnimationFrame(animate);
+          time += 0.002;
+
+          if (threeParticles) {
+            threeParticles.rotation.y += 0.0008;
+            threeParticles.rotation.x += 0.0003;
+          }
+          if (threeLines) {
+            threeLines.rotation.y += 0.0008;
+            threeLines.rotation.x += 0.0003;
+          }
+          if (threeSphere) {
+            threeSphere.rotation.y += 0.001;
+            threeSphere.rotation.x += 0.0005;
+          }
+
+          // Subtle camera parallax
+          threeCamera.position.x += (mouseX * 2 - threeCamera.position.x) * 0.02;
+          threeCamera.position.y += (mouseY * 2 - threeCamera.position.y) * 0.02;
+          threeCamera.lookAt(0, 0, 0);
+
+          threeRenderer.render(threeScene, threeCamera);
+        }
+
+        animate();
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+          if (!threeRenderer || !threeCamera) return;
+          threeCamera.aspect = window.innerWidth / window.innerHeight;
+          threeCamera.updateProjectionMatrix();
+          threeRenderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Cleanup on unload
+        window.addEventListener('beforeunload', () => {
+          if (animationFrameId) cancelAnimationFrame(animationFrameId);
+          if (threeRenderer) threeRenderer.dispose();
+          if (threeParticles) { threeParticles.geometry.dispose(); threeParticles.material.dispose(); }
+          if (threeLines) { threeLines.geometry.dispose(); threeLines.material.dispose(); }
+          if (threeSphere) { threeSphere.geometry.dispose(); threeSphere.material.dispose(); }
+        });
+
+      } catch (err) {
+        console.warn('Three.js failed, using CSS fallback:', err);
+        canvas.style.background = 'radial-gradient(ellipse at 50% 50%, #1a1f35 0%, #0a0c14 100%)';
+      }
+    }
+
+    // ============================================================
+    // 3. DEMO USERS & SESSION
+    // ============================================================
+    const DEFAULT_DEMO_USERS = [
+      { uid: 'demo_alex', name: 'Alex Morgan', email: 'alex@demo.ikaze', profession: 'Web Developer', avatar: 'AM', color: '#4a7aff', online: true },
+      { uid: 'demo_sarah', name: 'Sarah Kim', email: 'sarah@demo.ikaze', profession: 'UI/UX Designer', avatar: 'SK', color: '#b07aff', online: true },
+      { uid: 'demo_daniel', name: 'Daniel Smith', email: 'daniel@demo.ikaze', profession: 'ICT Specialist', avatar: 'DS', color: '#00ccff', online: false },
+      { uid: 'demo_grace', name: 'Grace Wilson', email: 'grace@demo.ikaze', profession: 'Robotics Enthusiast', avatar: 'GW', color: '#ff6b9d', online: true },
+      { uid: 'demo_michael', name: 'Michael Brown', email: 'michael@demo.ikaze', profession: 'Software Developer', avatar: 'MB', color: '#ffb432', online: false },
+    ];
+
+    async function loadDemoUsers() {
+      const stored = await DBService.getUser('__demo_users__');
+      if (stored && stored.list) {
+        demoUsers = stored.list;
+      } else {
+        demoUsers = DEFAULT_DEMO_USERS.map(u => ({ ...u }));
+        await DBService.saveUser({ uid: '__demo_users__', list: demoUsers });
+      }
+      renderDemoUserList();
+    }
+
+    function renderDemoUserList() {
+      const container = document.getElementById('demoUserList');
+      if (!container) return;
+      container.innerHTML = '';
+      demoUsers.forEach(u => {
+        const pill = document.createElement('div');
+        pill.className = 'demo-user-pill';
+        pill.innerHTML = `
+          <div class="pill-avatar" style="background:${u.color || '#3a4a6a'}22; color:${u.color || '#8899bb'}">${u.avatar || u.name.charAt(0)}</div>
+          <div class="pill-info">
+            <div class="pname">${u.name}</div>
+            <div class="prole">${u.profession} · Demo</div>
+          </div>
+        `;
+        pill.addEventListener('click', () => quickDemoLogin(u));
+        container.appendChild(pill);
+      });
+    }
+
+    async function quickDemoLogin(demoUser) {
+      // Create or retrieve session
+      const sessionUser = {
+        uid: demoUser.uid,
+        name: demoUser.name,
+        email: demoUser.email,
+        profession: demoUser.profession,
+        avatar: demoUser.avatar,
+        color: demoUser.color,
+        online: true,
+        onboardingCompleted: true, // demo users already onboarded
+        bio: `${demoUser.profession} at IKAZE CONNECT (demo)`,
+        joined: new Date().toISOString()
+      };
+      await DBService.saveUser(sessionUser);
+      currentUser = sessionUser;
+      localStorage.setItem('ikaze_session_uid', sessionUser.uid);
+      showAppAfterAuth();
+    }
+
+    async function restoreSession() {
+      const uid = localStorage.getItem('ikaze_session_uid');
+      if (!uid) return false;
+      const user = await DBService.getUser(uid);
+      if (user && !user.list) {
+        currentUser = user;
+        return true;
+      }
+      return false;
+    }
+
+    function signOut() {
+      currentUser = null;
+      localStorage.removeItem('ikaze_session_uid');
+      document.getElementById('authOverlay').classList.remove('hidden');
+      document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('onboardingOverlay').classList.add('hidden');
+      // Reset forms
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('regName').value = '';
+      document.getElementById('regEmail').value = '';
+      document.getElementById('regPassword').value = '';
+    }
+
+    // ============================================================
+    // 4. AUTH & ONBOARDING UI
+    // ============================================================
+    function setupAuthUI() {
+      // Tabs
+      document.querySelectorAll('.auth-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          const target = tab.dataset.tab;
+          document.getElementById('loginForm').classList.toggle('hidden', target !== 'login');
+          document.getElementById('registerForm').classList.toggle('hidden', target !== 'register');
+        });
+      });
+
+      // Login
+      document.getElementById('loginBtn').addEventListener('click', async () => {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if (!email || !password) {
+          alert('Please enter email and password');
+          return;
+        }
+        // Find demo user by email
+        const found = demoUsers.find(u => u.email === email);
+        if (found) {
+          await quickDemoLogin(found);
+        } else {
+          alert('Demo account not found. Try a demo user below or register.');
+        }
+      });
+
+      // Register
+      document.getElementById('registerBtn').addEventListener('click', async () => {
+        const name = document.getElementById('regName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPassword').value;
+        if (!name || !email || !password) {
+          alert('Please fill all fields');
+          return;
+        }
+        if (password.length < 6) {
+          alert('Password must be at least 6 characters');
+          return;
+        }
+        if (demoUsers.find(u => u.email === email)) {
+          alert('Email already in use');
+          return;
+        }
+        const newUser = {
+          uid: 'demo_' + Date.now(),
+          name,
+          email,
+          profession: 'Technology Enthusiast',
+          avatar: name.charAt(0).toUpperCase(),
+          color: '#4a7aff',
+          online: true,
+          onboardingCompleted: false,
+          bio: '',
+          joined: new Date().toISOString()
+        };
+        await DBService.saveUser(newUser);
+        demoUsers.push({ uid: newUser.uid, name, email, profession: newUser.profession, avatar: newUser.avatar, color: newUser.color, online: true });
+        await DBService.saveUser({ uid: '__demo_users__', list: demoUsers });
+        renderDemoUserList();
+        currentUser = newUser;
+        localStorage.setItem('ikaze_session_uid', newUser.uid);
+        showAppAfterAuth();
+      });
+
+      // Reset demo data
+      document.getElementById('resetDemoLink').addEventListener('click', async () => {
+        if (confirm('Reset all demo data? This will clear accounts, messages, and preferences.')) {
+          await DBService.clearAll();
+          localStorage.removeItem('ikaze_session_uid');
+          location.reload();
+        }
+      });
+
+      // Onboarding submit
+      document.getElementById('obSubmitBtn').addEventListener('click', async () => {
+        const name = document.getElementById('obName').value.trim() || currentUser.name;
+        const profession = document.getElementById('obProfession').value || currentUser.profession;
+        const spec = document.getElementById('obSpecializations').value;
+        const exp = document.getElementById('obExperience').value;
+        const purpose = document.getElementById('obPurpose').value;
+        currentUser.name = name;
+        currentUser.profession = profession;
+        currentUser.specializations = spec;
+        currentUser.experience = exp;
+        currentUser.purpose = purpose;
+        currentUser.onboardingCompleted = true;
+        await DBService.saveUser(currentUser);
+        document.getElementById('onboardingOverlay').classList.add('hidden');
+        showMainApp();
+      });
+
+      document.getElementById('obSkipBtn').addEventListener('click', async () => {
+        currentUser.onboardingCompleted = true;
+        await DBService.saveUser(currentUser);
+        document.getElementById('onboardingOverlay').classList.add('hidden');
+        showMainApp();
+      });
+    }
+
+    async function showAppAfterAuth() {
+      document.getElementById('authOverlay').classList.add('hidden');
+      if (currentUser && !currentUser.onboardingCompleted) {
+        // Show onboarding
+        document.getElementById('onboardingOverlay').classList.remove('hidden');
+        document.getElementById('obName').value = currentUser.name || '';
+        document.getElementById('obProfession').value = currentUser.profession || '';
+      } else {
+        showMainApp();
+      }
+    }
+
+    async function showMainApp() {
+      document.getElementById('mainApp').classList.remove('hidden');
+      document.getElementById('welcomeName').textContent = currentUser.name.split(' ')[0];
+      document.getElementById('headerAvatar').textContent = currentUser.avatar || currentUser.name.charAt(0);
+      document.getElementById('headerAvatar').style.background = currentUser.color || '#4a7aff';
+      await loadMessages();
+      renderRecentConversations();
+      updateChatWithDemoContent();
+      lucide.createIcons();
+    }
+
+    // ============================================================
+    // 5. MESSAGING ENGINE
+    // ============================================================
+    async function loadMessages() {
+      messages = await DBService.getAllMessages();
+      // Seed with demo messages if empty
+      if (Object.keys(messages).length === 0) {
+        await seedDemoMessages();
+      }
+    }
+
+    async function seedDemoMessages() {
+      const now = new Date();
+      const demoChats = [
+        {
+          chatId: 'demo_alex_demo_sarah',
+          msgs: [
+            { text: 'Hey! How is the new UI coming along?', senderId: 'demo_sarah', timestamp: new Date(now - 3600000).toISOString() },
+            { text: 'Almost done! Just polishing the dashboard.', senderId: 'demo_alex', timestamp: new Date(now - 3500000).toISOString() },
+            { text: 'Can you share a preview? 🎨', senderId: 'demo_sarah', timestamp: new Date(now - 1800000).toISOString() },
+          ]
+        },
+        {
+          chatId: 'demo_alex_demo_daniel',
+          msgs: [
+            { text: 'The network setup is complete. Testing tomorrow.', senderId: 'demo_daniel', timestamp: new Date(now - 7200000).toISOString() },
+            { text: 'Great work! Let me know if you need help.', senderId: 'demo_alex', timestamp: new Date(now - 7000000).toISOString() },
+          ]
+        },
+        {
+          chatId: 'demo_alex_demo_grace',
+          msgs: [
+            { text: 'The robotics workshop was amazing! 🤖', senderId: 'demo_grace', timestamp: new Date(now - 86400000).toISOString() },
+          ]
+        }
+      ];
+
+      for (const chat of demoChats) {
+        for (const msg of chat.msgs) {
+          const msgObj = {
+            id: chat.chatId + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+            chatId: chat.chatId,
+            senderId: msg.senderId,
+            senderName: demoUsers.find(u => u.uid === msg.senderId)?.name || 'User',
+            text: msg.text,
+            timestamp: msg.timestamp,
+            edited: null,
+            reactions: []
+          };
+          await DBService.saveMessage(msgObj);
+        }
+      }
+      messages = await DBService.getAllMessages();
+    }
+
+    function renderRecentConversations() {
+      const container = document.getElementById('recentConversations');
+      if (!container) return;
+      const chatKeys = Object.keys(messages).filter(k => k.includes(currentUser.uid) || true); // show all demo chats
+      if (chatKeys.length === 0) {
+        container.innerHTML = '<p style="color:#556688;font-size:13px;padding:12px 0;">No conversations yet.</p>';
+        return;
+      }
+      container.innerHTML = '';
+      chatKeys.slice(0, 4).forEach(chatId => {
+        const msgs = messages[chatId];
+        if (!msgs || msgs.length === 0) return;
+        const lastMsg = msgs[msgs.length - 1];
+        const otherId = chatId.split('_').filter(p => p !== 'demo' && p !== currentUser.uid.replace('demo_', ''))[0];
+        const otherUser = demoUsers.find(u => u.uid.includes(otherId)) || { name: 'Chat', avatar: 'C', color: '#4a7aff' };
+        const div = document.createElement('div');
+        div.className = 'conversation-item';
+        div.innerHTML = `
+          <div class="conv-avatar" style="background:${otherUser.color || '#3a4a6a'}22;color:${otherUser.color || '#8899bb'}">${otherUser.avatar || otherUser.name.charAt(0)}</div>
+          <div class="conv-info">
+            <div class="name">${otherUser.name}</div>
+            <div class="msg">${lastMsg.text.substring(0, 30)}${lastMsg.text.length > 30 ? '...' : ''}</div>
+          </div>
+          <div class="conv-time">${formatRelativeTime(lastMsg.timestamp)}</div>
+        `;
+        div.addEventListener('click', () => openChat(chatId, otherUser));
+        container.appendChild(div);
+      });
+    }
+
+    function updateChatWithDemoContent() {
+      // just for home
+    }
+
+    function openChat(chatId, contact) {
+      currentChat = { chatId, contact };
+      document.getElementById('homeView').style.display = 'none';
+      document.getElementById('otherView').classList.add('hidden');
+      document.getElementById('messagesView').classList.add('active');
+      document.getElementById('msgContactName').textContent = contact.name;
+      document.getElementById('msgContactStatus').textContent = contact.online ? 'Online' : 'Offline';
+      document.getElementById('msgAvatar').textContent = contact.avatar || contact.name.charAt(0);
+      document.getElementById('msgAvatar').style.background = (contact.color || '#4a7aff') + '22';
+      document.getElementById('msgAvatar').style.color = contact.color || '#4a7aff';
+      renderMessages(chatId);
+    }
+
+    function renderMessages(chatId) {
+      const list = document.getElementById('msgList');
+      if (!list) return;
+      const msgs = messages[chatId] || [];
+      list.innerHTML = '';
+      if (msgs.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:#556688;font-size:13px;padding:40px;">No messages yet. Say hello! 👋</p>';
+        return;
+      }
+      let lastDate = '';
+      msgs.forEach(msg => {
+        const msgDate = new Date(msg.timestamp).toDateString();
+        if (msgDate !== lastDate) {
+          lastDate = msgDate;
+          const sep = document.createElement('div');
+          sep.style.cssText = 'text-align:center;font-size:11px;color:#556688;padding:12px 0;';
+          sep.textContent = formatDateSeparator(msg.timestamp);
+          list.appendChild(sep);
+        }
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble' + (msg.senderId === currentUser.uid ? ' own' : '');
+        bubble.dataset.id = msg.id;
+        bubble.innerHTML = `
+          <div>${escapeHtml(msg.text)}${msg.edited ? '<span class="edited-label">(edited)</span>' : ''}</div>
+          <div class="msg-time" title="${new Date(msg.timestamp).toLocaleString()}">${formatRelativeTime(msg.timestamp)}</div>
+        `;
+        // Context menu on right click
+        bubble.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          showContextMenu(e.clientX, e.clientY, msg, bubble);
+        });
+        // Long press for mobile
+        let pressTimer;
+        bubble.addEventListener('touchstart', (e) => {
+          pressTimer = setTimeout(() => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            showContextMenu(touch.clientX, touch.clientY, msg, bubble);
+          }, 500);
+        });
+        bubble.addEventListener('touchend', () => clearTimeout(pressTimer));
+        bubble.addEventListener('touchmove', () => clearTimeout(pressTimer));
+        list.appendChild(bubble);
+      });
+      list.scrollTop = list.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('msgInput');
+      const text = input.value.trim();
+      if (!text || !currentChat) return;
+
+      if (editingMessageId) {
+        // Save edit
+        const msgs = messages[currentChat.chatId] || [];
+        const msg = msgs.find(m => m.id === editingMessageId);
+        if (msg) {
+          msg.text = text;
+          msg.edited = new Date().toISOString();
+          await DBService.saveMessage(msg);
+        }
+        editingMessageId = null;
+        input.value = '';
+        renderMessages(currentChat.chatId);
+        document.getElementById('msgInput').placeholder = 'Type a message...';
+        return;
+      }
+
+      const msgObj = {
+        id: currentChat.chatId + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        chatId: currentChat.chatId,
+        senderId: currentUser.uid,
+        senderName: currentUser.name,
+        text: text,
+        timestamp: new Date().toISOString(),
+        edited: null,
+        reactions: []
+      };
+      if (!messages[currentChat.chatId]) messages[currentChat.chatId] = [];
+      messages[currentChat.chatId].push(msgObj);
+      await DBService.saveMessage(msgObj);
+      input.value = '';
+      renderMessages(currentChat.chatId);
+      renderRecentConversations();
+    }
+
+    // ============================================================
+    // 6. CONTEXT MENU
+    // ============================================================
+    function showContextMenu(x, y, msg, bubble) {
+      const menu = document.getElementById('contextMenu');
+      contextMenuTarget = { msg, bubble };
+      menu.style.display = 'block';
+      menu.style.left = Math.min(x, window.innerWidth - 180) + 'px';
+      menu.style.top = Math.min(y, window.innerHeight - 200) + 'px';
+
+      // Show/hide edit/delete for own messages
+      const isOwn = msg.senderId === currentUser.uid;
+      document.getElementById('ctxEditBtn').style.display = isOwn ? 'flex' : 'none';
+      const deleteBtn = menu.querySelector('[data-action="delete"]');
+      if (deleteBtn) deleteBtn.style.display = isOwn ? 'flex' : 'none';
+
+      // Add action listeners (one-time)
+      menu.querySelectorAll('button').forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const action = btn.dataset.action;
+          menu.style.display = 'none';
+          if (action === 'edit' && isOwn) {
+            editingMessageId = msg.id;
+            document.getElementById('msgInput').value = msg.text;
+            document.getElementById('msgInput').placeholder = 'Editing message... (press Enter to save)';
+            document.getElementById('msgInput').focus();
+          } else if (action === 'delete' && isOwn) {
+            if (confirm('Delete this message?')) {
+              await DBService.deleteMessage(msg.id);
+              messages[currentChat.chatId] = messages[currentChat.chatId].filter(m => m.id !== msg.id);
+              renderMessages(currentChat.chatId);
+              renderRecentConversations();
+            }
+          } else if (action === 'copy') {
+            navigator.clipboard.writeText(msg.text).catch(() => {});
+          }
+        };
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('contextMenu');
+      if (!menu.contains(e.target)) menu.style.display = 'none';
+    });
+
+    // ============================================================
+    // 7. NAVIGATION & VIEW SWITCHING
+    // ============================================================
+    function setupNavigation() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+          const section = item.dataset.section;
+          if (section === 'home') {
+            document.getElementById('messagesView').classList.remove('active');
+            document.getElementById('homeView').style.display = 'block';
+            document.getElementById('otherView').classList.add('hidden');
+          } else if (section === 'messages') {
+            // For demo, open first chat
+            const chatKeys = Object.keys(messages);
+            if (chatKeys.length > 0) {
+              const firstChat = chatKeys[0];
+              const otherId = firstChat.split('_').filter(p => p !== 'demo')[0];
+              const contact = demoUsers.find(u => u.uid.includes(otherId)) || { name: 'Chat', avatar: 'C', color: '#4a7aff' };
+              openChat(firstChat, contact);
+            } else {
+              alert('No conversations yet. Start a new chat from Home.');
+            }
+          } else {
+            // Show placeholder for other sections
+            document.getElementById('messagesView').classList.remove('active');
+            document.getElementById('homeView').style.display = 'none';
+            const otherView = document.getElementById('otherView');
+            otherView.classList.remove('hidden');
+            document.getElementById('otherViewTitle').textContent = item.querySelector('span').textContent;
+          }
+        });
+      });
+
+      // Back button in messages
+      document.getElementById('backToHome').addEventListener('click', () => {
+        document.getElementById('messagesView').classList.remove('active');
+        document.getElementById('homeView').style.display = 'block';
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelector('.nav-item[data-section="home"]').classList.add('active');
+      });
+
+      // Send message
+      document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
+      document.getElementById('msgInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+      });
+
+      // Quick actions
+      document.getElementById('quickNewChat').addEventListener('click', () => {
+        document.querySelector('.nav-item[data-section="contacts"]').click();
+      });
+      document.getElementById('quickNewMeeting').addEventListener('click', () => {
+        document.querySelector('.nav-item[data-section="meet"]').click();
+      });
+      document.getElementById('quickShareFile').addEventListener('click', () => {
+        document.querySelector('.nav-item[data-section="files"]').click();
+      });
+      document.getElementById('createMeetingLink')?.addEventListener('click', () => {
+        document.querySelector('.nav-item[data-section="meet"]').click();
+      });
+    }
+
+    // ============================================================
+    // 8. ADMIN DOUBLE-CLICK
+    // ============================================================
+    function setupAdminShortcut() {
+      const homeView = document.getElementById('homeView');
+      const contentArea = document.getElementById('contentArea');
+
+      contentArea.addEventListener('dblclick', (e) => {
+        // Only trigger on home view
+        if (!homeView || homeView.style.display === 'none') return;
+        // Ignore interactive elements
+        const tag = e.target.tagName.toLowerCase();
+        if (['button', 'a', 'input', 'textarea', 'select', 'i', 'svg', 'path'].includes(tag)) return;
+        if (e.target.closest('button, a, input, textarea, select, .quick-btn, .nav-item, .conversation-item, .msg-bubble, .dash-card, .welcome-banner')) return;
+        // Navigate to admin
+        window.open(ADMIN_PAGE_URL, '_blank');
+      });
+    }
+
+    // ============================================================
+    // 9. HELPERS
+    // ============================================================
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatRelativeTime(timestamp) {
+      const now = new Date();
+      const date = new Date(timestamp);
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    function formatDateSeparator(timestamp) {
+      const date = new Date(timestamp);
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (date.toDateString() === today.toDateString()) return 'Today';
+      if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+      return date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    // ============================================================
+    // 10. BOOTSTRAP
+    // ============================================================
+    async function init() {
+      // Init Three.js
+      initThreeBackground();
+
+      // Init DB
+      try {
+        await DBService.open();
+      } catch (err) {
+        console.warn('IndexedDB unavailable, demo will not persist:', err);
+      }
+
+      // Load demo users
+      await loadDemoUsers();
+
+      // Setup UI
+      setupAuthUI();
+      setupNavigation();
+      setupAdminShortcut();
+
+      // Restore session
+      const restored = await restoreSession();
+      if (restored) {
+        showAppAfterAuth();
+      } else {
+        // Show auth overlay
+        document.getElementById('authOverlay').classList.remove('hidden');
+      }
+
+      // Create Lucide icons
+      lucide.createIcons();
+
+      // Expose signout on avatar click
+      document.getElementById('headerAvatar').addEventListener('click', () => {
+        if (confirm('Sign out of IKAZE CONNECT demo?')) {
+          signOut();
+        }
+      });
+
+      // Admin hint (toggle via double click)
+      const adminHint = document.getElementById('adminHint');
+      let hintShown = false;
+      document.getElementById('contentArea').addEventListener('dblclick', () => {
+        if (!hintShown) {
+          adminHint.style.display = 'block';
+          setTimeout(() => { adminHint.style.display = 'none'; hintShown = true; }, 3000);
+        }
+      });
+
+      console.log('IKAZE CONNECT — Demo Mode ready');
+      console.log('Double-click empty home space to open admin.html');
+    }
+
+    // Start
+    init();
+  </script>
+</body>
+</html>
