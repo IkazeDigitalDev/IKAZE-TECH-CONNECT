@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ikaze Group — Community & Collaborative Chat Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            ikaze: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#1e1b4b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; }
+    /* Custom thin scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.55); }
+    .drag-overlay {
+      background: rgba(79, 70, 229, 0.08);
+      border: 2px dashed #4f46e5;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 h-screen overflow-hidden flex flex-col">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="h-16 bg-slate-900 text-white border-b border-slate-800 px-4 lg:px-6 flex items-center justify-between shrink-0 z-30">
+    <div class="flex items-center gap-3">
+      <button onclick="openDirectoryView()" class="flex items-center gap-2.5 text-left group focus:outline-none">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 font-extrabold text-lg tracking-tight">
+          IK
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-base tracking-tight text-white group-hover:text-indigo-300 transition">Ikaze Group</span>
+            <span class="hidden sm:inline-block text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">Community Hub</span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Connect, collaborate &amp; share freely</p>
+        </div>
+      </button>
+    </div>
+
+    <!-- Center Quick View Tabs -->
+    <div class="hidden md:flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80">
+      <button id="navBtnDirectory" onclick="openDirectoryView()" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        Explore Groups
+      </button>
+      <button id="navBtnWorkspace" onclick="openLastJoinedGroup()" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        Group Chat
+      </button>
+    </div>
+
+    <!-- Right Controls: User Switcher, Inbox, Create -->
+    <div class="flex items-center gap-2.5 sm:gap-3">
+      <!-- Platform Admin Quick Broadcast Button -->
+      <button id="headerAdminFeedbackBtn" onclick="openFeedbackModal('all')" class="hidden items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-400/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+        <span class="hidden lg:inline">Send Feedback</span>
+      </button>
+
+      <!-- Inbox / Feedback Notifications -->
+      <button onclick="openInboxModal()" class="relative p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700" title="Inbox & Admin Feedback">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span id="unreadBadge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center shadow">0</span>
+      </button>
+
+      <!-- Active Account Switcher -->
+      <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1">
+        <div id="currentUserAvatar" class="w-6 h-6 rounded-full bg-indigo-500 text-white text-[11px] font-bold flex items-center justify-center shrink-0">AM</div>
+        <div class="flex flex-col">
+          <span class="text-[9px] uppercase tracking-wider text-slate-400 leading-none">Viewing as</span>
+          <select id="userSwitcher" onchange="switchUser(this.value)" class="bg-transparent text-xs font-semibold text-white focus:outline-none cursor-pointer pr-1">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Create Group CTA -->
+      <button onclick="openGroupFormModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-md shadow-indigo-600/25 transition flex items-center gap-1.5 shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        <span class="hidden sm:inline">Create Group</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN APPLICATION SHELL -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- LEFT SIDEBAR: JOINED GROUPS RAIL & QUICK NAVIGATION -->
+    <aside class="w-64 bg-slate-900 text-slate-300 border-r border-slate-800 hidden md:flex flex-col shrink-0">
+      <div class="p-3.5 border-b border-slate-800/80">
+        <button onclick="openDirectoryView()" id="sidebarExploreBtn" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-white transition">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            Discover All Groups
+          </span>
+          <span id="totalGroupsPill" class="text-[11px] bg-slate-700 text-slate-200 px-2 py-0.5 rounded-full">0</span>
+        </button>
+      </div>
+
+      <!-- Joined Groups List -->
+      <div class="flex-1 overflow-y-auto p-3 space-y-4">
+        <div>
+          <div class="px-2 mb-2 flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">My Joined Groups</span>
+            <button onclick="openGroupFormModal()" class="text-slate-400 hover:text-white text-xs font-bold" title="Create new group">+</button>
+          </div>
+          <div id="joinedGroupsRail" class="space-y-1">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Platform Admin Panel Shortcut (Visible only to Platform Admin) -->
+        <div id="sidebarAdminSection" class="hidden pt-3 border-t border-slate-800">
+          <div class="px-2 mb-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400">Platform Admin Controls</span>
+          </div>
+          <div class="space-y-1">
+            <button onclick="openFeedbackModal('all')" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              Broadcast to All Users
+            </button>
+            <button onclick="openFeedbackModal('single')" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+              <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+              Message Standalone User
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current User Footer Card -->
+      <div class="p-3 bg-slate-950/60 border-t border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div id="sidebarUserAvatar" class="w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">AM</div>
+          <div class="min-w-0">
+            <p id="sidebarUserName" class="text-xs font-semibold text-white truncate">Alex Morgan</p>
+            <p id="sidebarUserRole" class="text-[11px] text-slate-400 truncate">Community Member</p>
+          </div>
+        </div>
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-900 shrink-0" title="Online"></span>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA (SWITCHES BETWEEN DIRECTORY & LIVE GROUP CHAT WORKSPACE) -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+
+      <!-- ========================================================= -->
+      <!-- VIEW 1: IKAZE GROUP PUBLIC DIRECTORY                      -->
+      <!-- ========================================================= -->
+      <section id="directoryView" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div class="max-w-6xl mx-auto space-y-6">
+
+          <!-- Platform Admin Banner (Visible when logged in as Platform Admin) -->
+          <div id="adminBanner" class="hidden bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-5 border border-indigo-500/30 shadow-lg flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex items-start gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="font-bold text-sm sm:text-base">Ikaze Platform Admin Console</h2>
+                  <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-400/20 text-amber-300">Full Access</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-0.5">Edit or delete any group across the platform, manage members inside any room, or dispatch feedback to standalone users and all members.</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+              <button onclick="openFeedbackModal('single')" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/15 transition">
+                Feedback to Standalone User
+              </button>
+              <button onclick="openFeedbackModal('all')" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow transition">
+                Broadcast to All Users
+              </button>
+            </div>
+          </div>
+
+          <!-- Hero & Search Filter Bar -->
+          <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+              <div>
+                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Ikaze Group Directory</h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Create a group or join any open community below to chat, share files, and collaborate with members.</p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <button onclick="openGroupFormModal()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  Start a New Group
+                </button>
+              </div>
+            </div>
+
+            <!-- Search + Category Filter + Membership Filter -->
+            <div class="pt-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+              <div class="relative flex-1">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input id="searchInput" type="text" oninput="renderDirectory()" placeholder="Search Ikaze groups by name, topic, or creator..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition" />
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <select id="categoryFilter" onchange="renderDirectory()" class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="ALL">All Categories</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Design & Creative">Design &amp; Creative</option>
+                  <option value="Business & Startups">Business &amp; Startups</option>
+                  <option value="Community & Events">Community &amp; Events</option>
+                  <option value="Education & Study">Education &amp; Study</option>
+                </select>
+
+                <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/70">
+                  <button onclick="setMembershipFilter('all')" id="filterAllBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-sm transition">All Groups</button>
+                  <button onclick="setMembershipFilter('joined')" id="filterJoinedBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Joined</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Groups Grid -->
+          <div id="groupsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 pb-8">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- VIEW 2: ACTIVE GROUP CHAT & COLLABORATION WORKSPACE       -->
+      <!-- ========================================================= -->
+      <section id="workspaceView" class="hidden flex-1 flex flex-col min-h-0 bg-white">
+        <!-- Workspace Header -->
+        <div class="h-16 px-4 sm:px-6 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
+          <div class="flex items-center gap-3 min-w-0">
+            <button onclick="openDirectoryView()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition flex items-center gap-1 text-xs font-semibold" title="Back to Ikaze Directory">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+              <span class="hidden sm:inline">Groups</span>
+            </button>
+            <div class="h-5 w-[1px] bg-slate-200"></div>
+            <div id="wsGroupBadge" class="w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">IG</div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <h2 id="wsGroupName" class="font-bold text-sm sm:text-base text-slate-900 truncate">Group Name</h2>
+                <span id="wsGroupCategory" class="hidden sm:inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/70">Category</span>
+                <span id="wsRoleBadge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Member</span>
+              </div>
+              <p id="wsGroupSubtitle" class="text-xs text-slate-500 truncate">0 members • Open Ikaze community</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <!-- Group Admin / Platform Admin Quick Manage Button -->
+            <button id="wsManageBtn" onclick="toggleRightDrawer('manage')" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span class="hidden sm:inline">Manage Group</span>
+            </button>
+
+            <!-- Toggle Right Info/Members/Files Drawer -->
+            <button onclick="toggleRightDrawer()" id="toggleDrawerBtn" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-1.5 text-xs font-semibold" title="Members, Shared Files & Info">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span id="wsMemberCountHeader">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pinned Announcement Banner inside Group -->
+        <div id="wsPinnedBanner" class="hidden bg-indigo-50/90 border-b border-indigo-100 px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="px-2 py-0.5 rounded bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-wider shrink-0">Pinned</span>
+            <p id="wsPinnedText" class="text-xs font-medium text-indigo-950 truncate"></p>
+          </div>
+          <button id="wsClearPinBtn" onclick="clearPinnedNotice()" class="hidden text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 shrink-0">Unpin</button>
+        </div>
+
+        <!-- Workspace Body: Chat Stream + Collapsible Right Drawer -->
+        <div class="flex-1 flex min-h-0 overflow-hidden relative">
+
+          <!-- CHAT STREAM & COMPOSER -->
+          <div id="chatDropZone" class="flex-1 flex flex-col min-w-0 bg-slate-50/60 relative"
+               ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event)">
+
+            <!-- Drag & Drop Overlay -->
+            <div id="dropOverlay" class="hidden absolute inset-3 rounded-2xl drag-overlay z-20 flex flex-col items-center justify-center pointer-events-none">
+              <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg mb-3">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+              </div>
+              <p class="text-sm font-bold text-indigo-900">Drop files or images to upload to group</p>
+              <p class="text-xs text-indigo-600 mt-1">All group members will be able to preview and download</p>
+            </div>
+
+            <!-- Messages Feed -->
+            <div id="chatMessagesContainer" class="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-4">
+              <!-- Populated by JS -->
+            </div>
+
+            <!-- Staged Attachments Preview Bar -->
+            <div id="stagedFilesBar" class="hidden px-4 sm:px-6 py-2.5 bg-indigo-50/80 border-t border-indigo-100 flex flex-wrap items-center gap-2">
+              <!-- Populated by JS -->
+            </div>
+
+            <!-- Message & File Upload Composer -->
+            <div class="p-3 sm:p-4 bg-white border-t border-slate-200 shrink-0">
+              <form onsubmit="sendChatMessage(event)" class="max-w-4xl mx-auto">
+                <div class="flex items-end gap-2 bg-slate-50 border border-slate-300/90 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 rounded-2xl p-2 transition">
+                  <!-- Hidden Real File Input -->
+                  <input type="file" id="chatFileInput" multiple class="hidden" onchange="handleFileSelect(event)" />
+
+                  <!-- Upload File Button -->
+                  <button type="button" onclick="document.getElementById('chatFileInput').click()" class="p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition shrink-0" title="Upload files, documents, or images">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                  </button>
+
+                  <!-- Quick Sample File Button (Helpful for instant testing without local files) -->
+                  <button type="button" onclick="attachSampleAsset()" class="hidden sm:flex items-center gap-1 px-2.5 py-2 rounded-xl text-[11px] font-semibold text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 border border-slate-200/80 transition shrink-0" title="Attach a demo file to test sharing">
+                    <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    + Sample File
+                  </button>
+
+                  <!-- Text Input -->
+                  <textarea id="chatInput" rows="1" onkeydown="handleChatKeydown(event)" placeholder="Write a message to the group or drop files here..." class="flex-1 bg-transparent text-sm text-slate-900 placeholder-slate-400 focus:outline-none resize-none py-2 px-1 max-h-32"></textarea>
+
+                  <!-- Quick Emoji Picker Trigger -->
+                  <div class="relative">
+                    <button type="button" onclick="toggleQuickEmojiBar()" class="p-2.5 rounded-xl text-slate-500 hover:text-amber-500 hover:bg-amber-50 transition shrink-0" title="Insert emoji">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </button>
+                    <div id="quickEmojiPopover" class="hidden absolute bottom-12 right-0 bg-white border border-slate-200 shadow-xl rounded-xl p-2 flex items-center gap-1 z-30">
+                      <button type="button" onclick="insertEmoji('👋')" class="p-1.5 hover:bg-slate-100 rounded-lg text-base">👋</button>
+                      <button type="button" onclick="insertEmoji('🔥')" class="p-1.5 hover:bg-slate-100 rounded-lg text-base">🔥</button>
+                      <button type="button" onclick="insertEmoji('🚀')" class="p-1.5 hover:bg-slate-100 rounded-lg text-base">🚀</button>
+                      <button type="button" onclick="insertEmoji('🙌')" class="p-1.5 hover:bg-slate-100 rounded-lg text-base">🙌</button>
+                      <button type="button" onclick="insertEmoji('💡')" class="p-1.5 hover:bg-slate-100 rounded-lg text-base">💡</button>
+                      <button type="button" onclick="insertEmoji('✅')" class="p-1.5 hover:bg-slate-100 rounded-lg text-base">✅</button>
+                    </div>
+                  </div>
+
+                  <!-- Send Button -->
+                  <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 shrink-0">
+                    <span>Send</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- RIGHT COLLAPSIBLE DRAWER: MEMBERS, SHARED FILES & GROUP ADMIN MANAGEMENT -->
+          <aside id="workspaceRightDrawer" class="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 z-20 absolute lg:static inset-y-0 right-0 shadow-2xl lg:shadow-none">
+            <!-- Drawer Tabs -->
+            <div class="p-2.5 border-b border-slate-200 flex items-center gap-1 bg-slate-50">
+              <button onclick="setDrawerTab('members')" id="drawerTabMembers" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold bg-white text-indigo-700 shadow-sm transition">Members</button>
+              <button onclick="setDrawerTab('files')" id="drawerTabFiles" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Files</button>
+              <button onclick="setDrawerTab('manage')" id="drawerTabManage" class="hidden flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold text-amber-700 hover:bg-amber-50 transition">Manage</button>
+              <button onclick="toggleRightDrawer(false)" class="lg:hidden p-1.5 text-slate-400 hover:text-slate-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <!-- Drawer Body -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-5">
+              <!-- TAB 1: MEMBERS & GROUP ABOUT -->
+              <div id="drawerPanelMembers" class="space-y-5">
+                <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/70">
+                  <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">About Group</h4>
+                  <p id="drawerGroupDesc" class="text-xs text-slate-700 leading-relaxed"></p>
+                  <div class="mt-3 pt-2.5 border-t border-slate-200/70 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Group Admin:</span>
+                    <span id="drawerGroupCreator" class="font-semibold text-slate-800"></span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-2.5">
+                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Members (<span id="drawerMemberCount">0</span>)</h4>
+                  </div>
+                  <div id="drawerMembersList" class="space-y-2">
+                    <!-- Populated by JS -->
+                  </div>
+                </div>
+
+                <!-- Leave Group Action for non-creators -->
+                <div id="leaveGroupContainer" class="pt-3 border-t border-slate-100">
+                  <button onclick="leaveCurrentGroup()" class="w-full py-2 px-3 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold transition">
+                    Leave Ikaze Group
+                  </button>
+                </div>
+              </div>
+
+              <!-- TAB 2: SHARED FILES REPOSITORY -->
+              <div id="drawerPanelFiles" class="hidden space-y-3">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Shared Media &amp; Docs</h4>
+                  <button onclick="document.getElementById('chatFileInput').click()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">+ Upload</button>
+                </div>
+                <div id="drawerFilesList" class="space-y-2">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- TAB 3: GROUP ADMIN & PLATFORM ADMIN MANAGEMENT -->
+              <div id="drawerPanelManage" class="hidden space-y-5">
+                <div class="bg-amber-50 border border-amber-200/80 rounded-xl p-3">
+                  <p class="text-xs font-bold text-amber-900">Group Administration</p>
+                  <p class="text-[11px] text-amber-800/90 mt-0.5">Update group details, pin announcements for all members, or moderate membership.</p>
+                </div>
+
+                <!-- Pin Announcement Form -->
+                <div class="space-y-2">
+                  <label class="block text-xs font-bold text-slate-700">Pinned Group Announcement</label>
+                  <textarea id="managePinInput" rows="2" placeholder="Post a pinned notice at the top of the chat..." class="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                  <button onclick="savePinnedNotice()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition">
+                    Update Pinned Notice
+                  </button>
+                </div>
+
+                <!-- Edit Group Details -->
+                <div class="pt-3 border-t border-slate-200 space-y-2">
+                  <label class="block text-xs font-bold text-slate-700">Group Settings</label>
+                  <button onclick="openGroupFormModal(activeGroupId)" class="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition flex items-center justify-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Edit Group Name &amp; Info
+                  </button>
+                </div>
+
+                <!-- Member Moderation List -->
+                <div class="pt-3 border-t border-slate-200 space-y-2">
+                  <label class="block text-xs font-bold text-slate-700">Manage Members</label>
+                  <div id="manageMembersModerationList" class="space-y-1.5">
+                    <!-- Populated by JS -->
+                  </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="pt-3 border-t border-slate-200">
+                  <button onclick="deleteGroup(activeGroupId)" class="w-full py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition">
+                    Delete Group Permanently
+                  </button>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 1: CREATE / EDIT IKAZE GROUP                        -->
+  <!-- ========================================================= -->
+  <div id="groupFormModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div>
+          <h3 id="groupFormTitle" class="font-bold text-base">Create New Ikaze Group</h3>
+          <p class="text-xs text-slate-400">Publicly visible to all platform members to join and chat</p>
+        </div>
+        <button onclick="closeModal('groupFormModal')" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form onsubmit="saveGroupForm(event)" class="p-6 space-y-4">
+        <input type="hidden" id="editGroupIdInput" value="" />
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Group Name *</label>
+          <input id="groupNameInput" type="text" required placeholder="e.g., Kigali Tech Builders, Product Designers..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">Category *</label>
+            <select id="groupCategoryInput" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="Technology">Technology</option>
+              <option value="Design & Creative">Design &amp; Creative</option>
+              <option value="Business & Startups">Business &amp; Startups</option>
+              <option value="Community & Events">Community &amp; Events</option>
+              <option value="Education & Study">Education &amp; Study</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">Cover Accent Theme</label>
+            <select id="groupThemeInput" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="from-indigo-600 to-violet-600">Indigo &amp; Violet</option>
+              <option value="from-emerald-600 to-teal-600">Emerald &amp; Teal</option>
+              <option value="from-amber-500 to-orange-600">Amber &amp; Sunset</option>
+              <option value="from-rose-600 to-pink-600">Rose &amp; Crimson</option>
+              <option value="from-sky-600 to-blue-700">Ocean Blue</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Description &amp; Purpose *</label>
+          <textarea id="groupDescInput" rows="3" required placeholder="Describe what members will discuss, build, or share inside this group..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeModal('groupFormModal')" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button type="submit" id="groupFormSubmitBtn" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md transition">Create &amp; Open Group</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 2: ADMIN FEEDBACK DISPATCHER (STANDALONE / ALL)     -->
+  <!-- ========================================================= -->
+  <div id="feedbackModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-base">Admin Feedback &amp; Announcements</h3>
+          <p class="text-xs text-slate-400">Send feedback to a standalone user or broadcast to all members</p>
+        </div>
+        <button onclick="closeModal('feedbackModal')" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form onsubmit="submitAdminFeedback(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Recipient Audience</label>
+          <div class="grid grid-cols-2 gap-2.5">
+            <label class="cursor-pointer">
+              <input type="radio" name="feedbackTargetType" value="all" checked onchange="toggleFeedbackRecipientSelect()" class="peer sr-only" />
+              <div class="p-3 rounded-xl border border-slate-200 peer-checked:border-indigo-600 peer-checked:bg-indigo-50/70 text-center transition">
+                <p class="text-xs font-bold text-slate-900">All Platform Users</p>
+                <p class="text-[11px] text-slate-500">Global broadcast</p>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="feedbackTargetType" value="single" onchange="toggleFeedbackRecipientSelect()" class="peer sr-only" />
+              <div class="p-3 rounded-xl border border-slate-200 peer-checked:border-indigo-600 peer-checked:bg-indigo-50/70 text-center transition">
+                <p class="text-xs font-bold text-slate-900">Standalone User</p>
+                <p class="text-[11px] text-slate-500">Direct 1-on-1 feedback</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div id="standaloneUserSelectWrapper" class="hidden">
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Select Standalone User</label>
+          <select id="feedbackRecipientSelect" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Subject *</label>
+          <input id="feedbackSubjectInput" type="text" required placeholder="e.g., Community Spotlight, Group Moderation Note..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Feedback Message *</label>
+          <textarea id="feedbackBodyInput" rows="3" required placeholder="Write clear, constructive feedback or platform announcement..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeModal('feedbackModal')" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow transition">Send Feedback</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 3: USER INBOX & ADMIN FEEDBACK VIEWER               -->
+  <!-- ========================================================= -->
+  <div id="inboxModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+        <div>
+          <h3 class="font-bold text-base">Ikaze Inbox &amp; Admin Feedback</h3>
+          <p id="inboxSubtitle" class="text-xs text-slate-400">Direct admin notes and platform-wide broadcasts</p>
+        </div>
+        <button onclick="closeModal('inboxModal')" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="inboxListContainer" class="p-5 overflow-y-auto space-y-3 flex-1 bg-slate-50">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 4: IMAGE / FILE LIGHTBOX PREVIEW                    -->
+  <!-- ========================================================= -->
+  <div id="mediaPreviewModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-xs z-50 flex items-center justify-center p-4" onclick="closeModal('mediaPreviewModal')">
+    <div class="max-w-4xl w-full flex flex-col items-center" onclick="event.stopPropagation()">
+      <div class="w-full flex items-center justify-between text-white mb-3 px-1">
+        <span id="previewFileName" class="text-sm font-semibold truncate"></span>
+        <div class="flex items-center gap-3">
+          <a id="previewDownloadLink" href="#" download class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold">Download</a>
+          <button onclick="closeModal('mediaPreviewModal')" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <img id="previewImageEl" src="" alt="Preview" class="max-h-[78vh] rounded-xl shadow-2xl object-contain bg-slate-900" />
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- ========================================================= -->
+  <!-- APPLICATION LOGIC & STATE PERSISTENCE                     -->
+  <!-- ========================================================= -->
+  <script>
+    const STORAGE_KEY = 'ikaze_group_platform_v2';
+
+    // Default Users (Includes Standalone Members + Platform Admin)
+    const DEFAULT_USERS = [
+      { id: 'u_alex', name: 'Alex Morgan', handle: '@alexm', role: 'member', title: 'Product Designer', avatar: 'AM', color: 'bg-indigo-600' },
+      { id: 'u_sarah', name: 'Sarah Jenkins', handle: '@sarahj', role: 'member', title: 'Full-Stack Developer', avatar: 'SJ', color: 'bg-emerald-600' },
+      { id: 'u_david', name: 'David Chen', handle: '@davidc', role: 'member', title: 'Startup Founder', avatar: 'DC', color: 'bg-amber-600' },
+      { id: 'u_maya', name: 'Maya Patel', handle: '@mayap', role: 'member', title: 'Community Lead', avatar: 'MP', color: 'bg-rose-600' },
+      { id: 'u_admin', name: 'Platform Admin', handle: '@ikaze_admin', role: 'admin', title: 'Ikaze Administrator', avatar: 'AD', color: 'bg-slate-900' }
+    ];
+
+    // Seed Groups with Realistic Chat & Shared File History
+    const DEFAULT_GROUPS = [
+      {
+        id: 'grp_ikaze_builders',
+        name: 'Ikaze Builders & Tech Hub',
+        category: 'Technology',
+        theme: 'from-indigo-600 to-violet-600',
+        description: 'Open space for developers, engineers, and product builders to share architectures, review code, and upload project specs.',
+        creatorId: 'u_alex',
+        createdAt: '2026-11-18',
+        pinnedNotice: 'Welcome to Ikaze Builders! Drop your project demos or architecture PDFs anytime.',
+        members: ['u_alex', 'u_sarah', 'u_david'],
+        messages: [
+          {
+            id: 'm_101',
+            senderId: 'u_alex',
+            text: 'Welcome everyone to Ikaze Builders & Tech Hub! Feel free to share your current builds, UI mockups, or technical docs here.',
+            timestamp: '09:15 AM',
+            attachments: [],
+            reactions: { '👋': ['u_sarah', 'u_david'], '🚀': ['u_sarah'] }
+          },
+          {
+            id: 'm_102',
+            senderId: 'u_sarah',
+            text: 'Excited to be here! I just uploaded the Q4 API Gateway blueprint so everyone can review the endpoints.',
+            timestamp: '09:22 AM',
+            attachments: [
+              {
+                id: 'att_1',
+                name: 'Ikaze_API_Gateway_Spec_v2.pdf',
+                size: '1.4 MB',
+                type: 'application/pdf',
+                isImage: false,
+                dataUrl: 'data:text/plain;charset=utf-8,' + encodeURIComponent('IKAZE GROUP TECHNICAL SPECIFICATION\n\n1. Real-time WebSocket Chat Cluster\n2. Multipart File & Media Storage\n3. Role-Based Group Administration')
+              }
+            ],
+            reactions: { '🔥': ['u_alex', 'u_david'] }
+          },
+          {
+            id: 'm_103',
+            senderId: 'u_david',
+            text: 'Clean structure, Sarah! Let us sync later today on the onboarding flow.',
+            timestamp: '09:30 AM',
+            attachments: [],
+            reactions: { '👍': ['u_sarah'] }
+          }
+        ]
+      },
+      {
+        id: 'grp_creative_studio',
+        name: 'Ikaze Design & Creative Studio',
+        category: 'Design & Creative',
+        theme: 'from-rose-600 to-pink-600',
+        description: 'Share brand kits, UI/UX inspirations, photography, and collaborate on visual storytelling across the Ikaze community.',
+        creatorId: 'u_maya',
+        createdAt: '2026-11-20',
+        pinnedNotice: 'Weekly Design Critique every Friday — upload your moodboards directly in chat!',
+        members: ['u_maya', 'u_alex'],
+        messages: [
+          {
+            id: 'm_201',
+            senderId: 'u_maya',
+            text: 'Hey creators! Post your latest visual concepts or brand assets here for live feedback.',
+            timestamp: '11:05 AM',
+            attachments: [],
+            reactions: { '❤️': ['u_alex'] }
+          }
+        ]
+      },
+      {
+        id: 'grp_founders_circle',
+        name: 'East Africa Founders & Startups',
+        category: 'Business & Startups',
+        theme: 'from-emerald-600 to-teal-600',
+        description: 'Connect with founders, exchange pitch decks, discuss growth strategies, and share market insights openly.',
+        creatorId: 'u_david',
+        createdAt: '2026-11-22',
+        pinnedNotice: '',
+        members: ['u_david', 'u_maya', 'u_sarah'],
+        messages: [
+          {
+            id: 'm_301',
+            senderId: 'u_david',
+            text: 'Who is preparing for the upcoming seed demo day? Happy to review pitch decks.',
+            timestamp: '02:10 PM',
+            attachments: [],
+            reactions: { '🙌': ['u_maya'] }
+          }
+        ]
+      }
+    ];
+
+    const DEFAULT_FEEDBACK = [
+      {
+        id: 'fb_1',
+        targetType: 'all',
+        recipientId: 'all',
+        subject: 'Welcome to Ikaze Group Collaboration!',
+        body: 'All members can now create public groups, join any community freely, chat in real time, and upload documents or images inside group workspaces.',
+        timestamp: 'Nov 24, 2026 • 08:00 AM',
+        readBy: []
+      },
+      {
+        id: 'fb_2',
+        targetType: 'single',
+        recipientId: 'u_alex',
+        subject: 'Great job leading Ikaze Builders!',
+        body: 'Hi Alex, thank you for kicking off the Ikaze Builders & Tech Hub and keeping discussions active and welcoming for new members.',
+        timestamp: 'Nov 24, 2026 • 10:15 AM',
+        readBy: []
+      }
+    ];
+
+    // Application State
+    let state = loadState();
+    let activeView = 'directory'; // 'directory' | 'workspace'
+    let activeGroupId = null;
+    let membershipFilter = 'all';
+    let stagedFiles = [];
+    let currentDrawerTab = 'members';
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.groups) && Array.isArray(parsed.users)) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not read localStorage, using defaults.', e);
+      }
+      return {
+        currentUserId: 'u_alex',
+        users: DEFAULT_USERS,
+        groups: DEFAULT_GROUPS,
+        feedbacks: DEFAULT_FEEDBACK
+      };
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        showToast('Storage quota warning: Large file kept in current session.', 'amber');
+      }
+    }
+
+    function getCurrentUser() {
+      return state.users.find(u => u.id === state.currentUserId) || state.users[0];
+    }
+
+    function getUserById(id) {
+      return state.users.find(u => u.id === id) || { id, name: 'Unknown User', handle: '@user', role: 'member', avatar: '?', color: 'bg-slate-500' };
+    }
+
+    function isPlatformAdmin() {
+      return getCurrentUser().role === 'admin';
+    }
+
+    function isGroupAdmin(group) {
+      const user = getCurrentUser();
+      return user.role === 'admin' || group.creatorId === user.id;
+    }
+
+    function isGroupMember(group) {
+      return group.members.includes(getCurrentUser().id);
+    }
+
+    // =========================================================
+    // INITIALIZATION & USER SWITCHING
+    // =========================================================
+    function init() {
+      populateUserSwitcher();
+      syncChromeUI();
+      renderDirectory();
+    }
+
+    function populateUserSwitcher() {
+      const select = document.getElementById('userSwitcher');
+      select.innerHTML = state.users.map(u => `
+        <option value="${u.id}" class="text-slate-900 bg-white" ${u.id === state.currentUserId ? 'selected' : ''}>
+          ${u.name} ${u.role === 'admin' ? '(Admin)' : ''}
+        </option>
+      `).join('');
+    }
+
+    function switchUser(userId) {
+      state.currentUserId = userId;
+      saveState();
+      stagedFiles = [];
+      renderStagedFiles();
+      syncChromeUI();
+
+      if (activeView === 'workspace' && activeGroupId) {
+        const grp = state.groups.find(g => g.id === activeGroupId);
+        if (!grp) {
+          openDirectoryView();
+        } else if (!isGroupMember(grp) && !isPlatformAdmin()) {
+          showToast(`Switched to ${getCurrentUser().name}. Join "${grp.name}" to participate.`, 'info');
+          openDirectoryView();
+        } else {
+          renderWorkspace();
+        }
+      } else {
+        renderDirectory();
+      }
+      showToast(`Viewing Ikaze Group as ${getCurrentUser().name}`, 'info');
+    }
+
+    function syncChromeUI() {
+      const user = getCurrentUser();
+      const admin = isPlatformAdmin();
+
+      // Header User Info
+      const headerAvatar = document.getElementById('currentUserAvatar');
+      headerAvatar.textContent = user.avatar;
+      headerAvatar.className = `w-6 h-6 rounded-full ${user.color} text-white text-[11px] font-bold flex items-center justify-center shrink-0`;
+
+      // Sidebar User Info
+      const sideAvatar = document.getElementById('sidebarUserAvatar');
+      sideAvatar.textContent = user.avatar;
+      sideAvatar.className = `w-8 h-8 rounded-full ${user.color} text-white text-xs font-bold flex items-center justify-center shrink-0`;
+      document.getElementById('sidebarUserName').textContent = user.name;
+      document.getElementById('sidebarUserRole').textContent = admin ? 'Platform Admin' : user.title;
+
+      // Admin-only UI elements
+      document.getElementById('headerAdminFeedbackBtn').classList.toggle('hidden', !admin);
+      document.getElementById('headerAdminFeedbackBtn').classList.toggle('flex', admin);
+      document.getElementById('sidebarAdminSection').classList.toggle('hidden', !admin);
+      document.getElementById('adminBanner').classList.toggle('hidden', !admin);
+
+      // Update Unread Feedback Badge
+      const unreadCount = state.feedbacks.filter(fb =>
+        (fb.targetType === 'all' || fb.recipientId === user.id) &&
+        !fb.readBy.includes(user.id)
+      ).length;
+      const badge = document.getElementById('unreadBadge');
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      // Update Sidebar Joined Groups Rail
+      renderJoinedGroupsRail();
+    }
+
+    function renderJoinedGroupsRail() {
+      const user = getCurrentUser();
+      const rail = document.getElementById('joinedGroupsRail');
+      document.getElementById('totalGroupsPill').textContent = state.groups.length;
+
+      const accessibleGroups = isPlatformAdmin()
+        ? state.groups
+        : state.groups.filter(g => g.members.includes(user.id));
+
+      if (accessibleGroups.length === 0) {
+        rail.innerHTML = `<p class="px-2 py-3 text-[11px] text-slate-500 italic">No groups joined yet. Explore and join any group!</p>`;
+        return;
+      }
+
+      rail.innerHTML = accessibleGroups.map(g => {
+        const isActive = activeView === 'workspace' && activeGroupId === g.id;
+        const initials = g.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+        return `
+          <button onclick="openGroupWorkspace('${g.id}')" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left transition ${isActive ? 'bg-indigo-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br ${g.theme} text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+              ${initials}
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-semibold truncate">${escapeHtml(g.name)}</p>
+              <p class="text-[10px] ${isActive ? 'text-indigo-200' : 'text-slate-400'} truncate">${g.members.length} members</p>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // =========================================================
+    // VIEW SWITCHING: DIRECTORY vs. GROUP CHAT WORKSPACE
+    // =========================================================
+    function openDirectoryView() {
+      activeView = 'directory';
+      document.getElementById('directoryView').classList.remove('hidden');
+      document.getElementById('workspaceView').classList.add('hidden');
+
+      document.getElementById('navBtnDirectory').className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow';
+      document.getElementById('navBtnWorkspace').className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white';
+      document.getElementById('sidebarExploreBtn').className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow transition';
+
+      renderJoinedGroupsRail();
+      renderDirectory();
+    }
+
+    function openLastJoinedGroup() {
+      const user = getCurrentUser();
+      if (activeGroupId && state.groups.some(g => g.id === activeGroupId)) {
+        openGroupWorkspace(activeGroupId);
+        return;
+      }
+      const first = isPlatformAdmin()
+        ? state.groups[0]
+        : state.groups.find(g => g.members.includes(user.id));
+
+      if (first) {
+        openGroupWorkspace(first.id);
+      } else {
+        showToast('Join any group from the directory first to start chatting!', 'info');
+        openDirectoryView();
+      }
+    }
+
+    function openGroupWorkspace(groupId) {
+      const group = state.groups.find(g => g.id === groupId);
+      if (!group) return;
+
+      // Ensure user is a member or platform admin
+      if (!isGroupMember(group) && !isPlatformAdmin()) {
+        joinGroup(groupId, true);
+        return;
+      }
+
+      activeView = 'workspace';
+      activeGroupId = groupId;
+      stagedFiles = [];
+      renderStagedFiles();
+
+      document.getElementById('directoryView').classList.add('hidden');
+      document.getElementById('workspaceView').classList.remove('hidden');
+
+      document.getElementById('navBtnDirectory').className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white';
+      document.getElementById('navBtnWorkspace').className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow';
+      document.getElementById('sidebarExploreBtn').className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 hover:bg-slate-700 transition';
+
+      renderJoinedGroupsRail();
+      renderWorkspace();
+    }
+
+    // =========================================================
+    // DIRECTORY RENDERING & MEMBERSHIP ACTIONS
+    // =========================================================
+    function setMembershipFilter(filter) {
+      membershipFilter = filter;
+      document.getElementById('filterAllBtn').className = filter === 'all'
+        ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-sm transition'
+        : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+      document.getElementById('filterJoinedBtn').className = filter === 'joined'
+        ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-sm transition'
+        : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+      renderDirectory();
+    }
+
+    function renderDirectory() {
+      const grid = document.getElementById('groupsGrid');
+      const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      const category = document.getElementById('categoryFilter').value;
+      const user = getCurrentUser();
+      const admin = isPlatformAdmin();
+
+      const filtered = state.groups.filter(g => {
+        const creator = getUserById(g.creatorId);
+        const matchesQuery = !query ||
+          g.name.toLowerCase().includes(query) ||
+          g.description.toLowerCase().includes(query) ||
+          creator.name.toLowerCase().includes(query);
+        const matchesCat = category === 'ALL' || g.category === category;
+        const matchesMem = membershipFilter === 'all' || g.members.includes(user.id);
+        return matchesQuery && matchesCat && matchesMem;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl p-12 border border-slate-200 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <h3 class="text-base font-bold text-slate-900">No Ikaze groups match your filter</h3>
+            <p class="text-xs text-slate-500 mt-1 mb-4">Try clearing your search or create a brand-new group for the community.</p>
+            <button onclick="openGroupFormModal()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">Create Group</button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(group => {
+        const joined = group.members.includes(user.id);
+        const canManage = isGroupAdmin(group);
+        const creator = getUserById(group.creatorId);
+        const sharedFilesCount = group.messages.reduce((acc, m) => acc + (m.attachments ? m.attachments.length : 0), 0);
+
+        // Member avatar stack
+        const avatarStack = group.members.slice(0, 4).map(mId => {
+          const m = getUserById(mId);
+          return `<div class="w-7 h-7 rounded-full ${m.color} text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white" title="${escapeHtml(m.name)}">${m.avatar}</div>`;
+        }).join('');
+
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition flex flex-col overflow-hidden group">
+            <!-- Top Gradient Banner -->
+            <div class="h-20 bg-gradient-to-r ${group.theme} p-4 flex items-start justify-between relative">
+              <span class="px-2.5 py-1 rounded-lg bg-black/25 backdrop-blur-xs text-white text-[11px] font-semibold">
+                ${escapeHtml(group.category)}
+              </span>
+
+              <!-- Admin / Group Creator Quick Edit & Delete Icons -->
+              ${canManage ? `
+                <div class="flex items-center gap-1.5">
+                  <button onclick="openGroupFormModal('${group.id}')" class="p-1.5 rounded-lg bg-white/20 hover:bg-white/35 text-white backdrop-blur-xs transition" title="Edit Group">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </button>
+                  <button onclick="deleteGroup('${group.id}')" class="p-1.5 rounded-lg bg-rose-500/80 hover:bg-rose-600 text-white backdrop-blur-xs transition" title="Delete Group">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-5 flex-1 flex flex-col">
+              <div class="flex items-start justify-between gap-2">
+                <h3 class="font-bold text-base text-slate-900 leading-snug">${escapeHtml(group.name)}</h3>
+                ${joined ? `<span class="shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Joined</span>` : ''}
+              </div>
+
+              <p class="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed flex-1">${escapeHtml(group.description)}</p>
+
+              <!-- Meta Stats -->
+              <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                <div class="flex items-center -space-x-2">
+                  ${avatarStack}
+                  ${group.members.length > 4 ? `<div class="w-7 h-7 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold flex items-center justify-center ring-2 ring-white">+${group.members.length - 4}</div>` : ''}
+                  <span class="pl-3 font-medium text-slate-600">${group.members.length} members</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <span title="Messages">${group.messages.length} msgs</span>
+                  <span>•</span>
+                  <span title="Shared Files">${sharedFilesCount} files</span>
+                </div>
+              </div>
+
+              <div class="mt-1.5 text-[11px] text-slate-400">
+                Created by <span class="font-semibold text-slate-600">${escapeHtml(creator.name)}</span>
+              </div>
+
+              <!-- Primary Action Buttons -->
+              <div class="mt-4 flex items-center gap-2">
+                ${joined ? `
+                  <button onclick="openGroupWorkspace('${group.id}')" class="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    Open Group Chat
+                  </button>
+                ` : `
+                  <button onclick="joinGroup('${group.id}', true)" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                    Join &amp; Open Group
+                  </button>
+                  ${admin ? `
+                    <button onclick="openGroupWorkspace('${group.id}')" class="py-2.5 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold transition" title="Inspect as Platform Admin">
+                      Inspect
+                    </button>
+                  ` : ''}
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function joinGroup(groupId, openImmediately = true) {
+      const group = state.groups.find(g => g.id === groupId);
+      const user = getCurrentUser();
+      if (!group) return;
+
+      if (!group.members.includes(user.id)) {
+        group.members.push(user.id);
+        group.messages.push({
+          id: 'm_' + Date.now(),
+          senderId: user.id,
+          isSystem: true,
+          text: `${user.name} joined ${group.name}. Say hello!`,
+          timestamp: formatCurrentTime(),
+          attachments: [],
+          reactions: {}
+        });
+        saveState();
+        syncChromeUI();
+        showToast(`Joined "${group.name}"!`, 'success');
+      }
+
+      if (openImmediately) {
+        openGroupWorkspace(groupId);
+      } else {
+        renderDirectory();
+      }
+    }
+
+    function leaveCurrentGroup() {
+      const group = state.groups.find(g => g.id === activeGroupId);
+      const user = getCurrentUser();
+      if (!group) return;
+
+      if (group.creatorId === user.id) {
+        showToast('As the Group Admin, you can edit or delete the group under Manage.', 'amber');
+        return;
+      }
+
+      group.members = group.members.filter(id => id !== user.id);
+      group.messages.push({
+        id: 'm_' + Date.now(),
+        senderId: user.id,
+        isSystem: true,
+        text: `${user.name} left the group.`,
+        timestamp: formatCurrentTime(),
+        attachments: [],
+        reactions: {}
+      });
+      saveState();
+      syncChromeUI();
+      showToast(`You left "${group.name}".`, 'info');
+      openDirectoryView();
+    }
+
+    // =========================================================
+    // WORKSPACE CHAT, FILE UPLOADS & REACTIONS
+    // =========================================================
+    function renderWorkspace() {
+      const group = state.groups.find(g => g.id === activeGroupId);
+      if (!group) return;
+
+      const user = getCurrentUser();
+      const canManage = isGroupAdmin(group);
+      const initials = group.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+
+      // Header Info
+      const badge = document.getElementById('wsGroupBadge');
+      badge.textContent = initials;
+      badge.className = `w-10 h-10 rounded-xl bg-gradient-to-br ${group.theme} text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm`;
+
+      document.getElementById('wsGroupName').textContent = group.name;
+      document.getElementById('wsGroupCategory').textContent = group.category;
+      document.getElementById('wsGroupSubtitle').textContent = `${group.members.length} members • Open Ikaze community`;
+      document.getElementById('wsMemberCountHeader').textContent = group.members.length;
+
+      const roleBadge = document.getElementById('wsRoleBadge');
+      if (isPlatformAdmin()) {
+        roleBadge.textContent = 'Platform Admin';
+        roleBadge.className = 'text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300';
+      } else if (group.creatorId === user.id) {
+        roleBadge.textContent = 'Group Admin';
+        roleBadge.className = 'text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200';
+      } else {
+        roleBadge.textContent = 'Member';
+        roleBadge.className = 'text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+      }
+
+      // Manage Button & Drawer Tab Visibility
+      document.getElementById('wsManageBtn').classList.toggle('hidden', !canManage);
+      document.getElementById('wsManageBtn').classList.toggle('flex', canManage);
+      document.getElementById('drawerTabManage').classList.toggle('hidden', !canManage);
+      if (!canManage && currentDrawerTab === 'manage') {
+        setDrawerTab('members');
+      }
+
+      // Pinned Notice Banner
+      const pinBanner = document.getElementById('wsPinnedBanner');
+      if (group.pinnedNotice && group.pinnedNotice.trim()) {
+        pinBanner.classList.remove('hidden');
+        document.getElementById('wsPinnedText').textContent = group.pinnedNotice;
+        document.getElementById('wsClearPinBtn').classList.toggle('hidden', !canManage);
+      } else {
+        pinBanner.classList.add('hidden');
+      }
+
+      renderChatMessages(group);
+      renderRightDrawer(group);
+    }
+
+    function renderChatMessages(group) {
+      const container = document.getElementById('chatMessagesContainer');
+      const currentUser = getCurrentUser();
+      const canModerate = isGroupAdmin(group);
+
+      if (group.messages.length === 0) {
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center py-12">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            </div>
+            <h3 class="text-sm font-bold text-slate-900">Start the conversation in ${escapeHtml(group.name)}</h3>
+            <p class="text-xs text-slate-500 max-w-sm mt-1">Send a welcome message or upload files to collaborate with group members.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = group.messages.map(msg => {
+        if (msg.isSystem) {
+          return `
+            <div class="flex justify-center my-2">
+              <span class="px-3 py-1 rounded-full bg-slate-200/70 text-slate-600 text-[11px] font-medium">
+                ${escapeHtml(msg.text)} • ${msg.timestamp}
+              </span>
+            </div>
+          `;
+        }
+
+        const sender = getUserById(msg.senderId);
+        const isSelf = msg.senderId === currentUser.id;
+        const isCreator = msg.senderId === group.creatorId;
+        const isAdminSender = sender.role === 'admin';
+
+        // Render Attachments
+        const attachmentsHtml = (msg.attachments || []).map(att => {
+          if (att.isImage) {
+            return `
+              <div class="mt-2 group/img relative inline-block max-w-xs sm:max-w-sm">
+                <img src="${att.dataUrl}" alt="${escapeHtml(att.name)}" onclick="openMediaPreview('${att.dataUrl}', '${escapeHtml(att.name)}')" class="rounded-xl border border-slate-200/80 max-h-60 object-cover cursor-pointer hover:opacity-95 transition shadow-xs" />
+                <div class="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+                  <span class="truncate max-w-[180px]">${escapeHtml(att.name)}</span>
+                  <a href="${att.dataUrl}" download="${escapeHtml(att.name)}" class="text-indigo-600 hover:underline font-semibold ml-2">Download</a>
+                </div>
+              </div>
+            `;
+          }
+          return `
+            <div class="mt-2 flex items-center justify-between gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs max-w-sm">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 font-bold text-[10px] uppercase">
+                  ${escapeHtml((att.name.split('.').pop() || 'FILE').slice(0, 4))}
+                </div>
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-slate-900 truncate">${escapeHtml(att.name)}</p>
+                  <p class="text-[10px] text-slate-400">${escapeHtml(att.size || 'Document')}</p>
+                </div>
+              </div>
+              <a href="${att.dataUrl}" download="${escapeHtml(att.name)}" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-700 text-[11px] font-semibold transition shrink-0">
+                Download
+              </a>
+            </div>
+          `;
+        }).join('');
+
+        // Render Emoji Reactions
+        const reactionsObj = msg.reactions || {};
+        const reactionPills = Object.entries(reactionsObj)
+          .filter(([, users]) => users && users.length > 0)
+          .map(([emoji, users]) => {
+            const reacted = users.includes(currentUser.id);
+            return `
+              <button onclick="toggleReaction('${msg.id}', '${emoji}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border transition ${reacted ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
+                <span>${emoji}</span>
+                <span>${users.length}</span>
+              </button>
+            `;
+          }).join('');
+
+        return `
+          <div class="flex items-start gap-3 group/msg ${isSelf ? 'flex-row-reverse' : ''}">
+            <div class="w-9 h-9 rounded-full ${sender.color} text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+              ${sender.avatar}
+            </div>
+
+            <div class="max-w-[82%] sm:max-w-[72%] flex flex-col ${isSelf ? 'items-end' : 'items-start'}">
+              <div class="flex items-center gap-2 mb-1 ${isSelf ? 'flex-row-reverse' : ''}">
+                <span class="text-xs font-bold text-slate-900">${escapeHtml(sender.name)}</span>
+                ${isAdminSender ? `<span class="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">Admin</span>` : ''}
+                ${isCreator && !isAdminSender ? `<span class="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-700">Group Admin</span>` : ''}
+                <span class="text-[10px] text-slate-400">${msg.timestamp}</span>
+              </div>
+
+              <div class="relative rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-2xs ${isSelf ? 'bg-indigo-600 text-white rounded-tr-xs' : 'bg-white text-slate-800 border border-slate-200/90 rounded-tl-xs'}">
+                ${msg.text ? `<p class="whitespace-pre-wrap break-words">${escapeHtml(msg.text)}</p>` : ''}
+                ${attachmentsHtml}
+
+                <!-- Hover Quick Action Bar (React / Delete Message) -->
+                <div class="opacity-0 group-hover/msg:opacity-100 transition-opacity absolute -top-3 ${isSelf ? 'left-2' : 'right-2'} flex items-center gap-0.5 bg-white border border-slate-200 shadow-md rounded-full px-1.5 py-0.5 z-10">
+                  <button onclick="toggleReaction('${msg.id}', '👍')" class="hover:bg-slate-100 rounded-full p-1 text-xs" title="Like">👍</button>
+                  <button onclick="toggleReaction('${msg.id}', '❤️')" class="hover:bg-slate-100 rounded-full p-1 text-xs" title="Love">❤️</button>
+                  <button onclick="toggleReaction('${msg.id}', '🔥')" class="hover:bg-slate-100 rounded-full p-1 text-xs" title="Fire">🔥</button>
+                  ${(isSelf || canModerate) ? `
+                    <button onclick="deleteMessage('${msg.id}')" class="hover:bg-rose-50 text-rose-600 rounded-full p-1 text-[10px] font-bold ml-0.5" title="Delete message">✕</button>
+                  ` : ''}
+                </div>
+              </div>
+
+              ${reactionPills ? `<div class="flex flex-wrap items-center gap-1 mt-1.5">${reactionPills}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Scroll to bottom
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function sendChatMessage(event) {
+      event.preventDefault();
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text && stagedFiles.length === 0) return;
+
+      const group = state.groups.find(g => g.id === activeGroupId);
+      if (!group) return;
+
+      const user = getCurrentUser();
+      if (!group.members.includes(user.id)) {
+        group.members.push(user.id);
+      }
+
+      group.messages.push({
+        id: 'm_' + Date.now(),
+        senderId: user.id,
+        text,
+        timestamp: formatCurrentTime(),
+        attachments: [...stagedFiles],
+        reactions: {}
+      });
+
+      input.value = '';
+      stagedFiles = [];
+      renderStagedFiles();
+      saveState();
+      renderWorkspace();
+    }
+
+    function handleChatKeydown(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendChatMessage(event);
+      }
+    }
+
+    function toggleReaction(msgId, emoji) {
+      const group = state.groups.find(g => g.id === activeGroupId);
+      if (!group) return;
+      const msg = group.messages.find(m => m.id === msgId);
+      if (!msg) return;
+
+      const userId = getCurrentUser().id;
+      if (!msg.reactions) msg.reactions = {};
+      if (!msg.reactions[emoji]) msg.reactions[emoji] = [];
+
+      if (msg.reactions[emoji].includes(userId)) {
+        msg.reactions[emoji] = msg.reactions[emoji].filter(id => id !== userId);
+      } else {
+        msg.reactions[emoji].push(userId);
+      }
+      saveState();
+      renderChatMessages(group);
+    }
+
+    function deleteMessage(msgId) {
+      const group = state.groups.find(g => g.id === activeGroupId);
+      if (!group) return;
+      group.messages = group.messages.filter(m => m.id !== msgId);
+      saveState();
+      renderWorkspace();
+      showToast('Message removed.', 'info');
+    }
+
+    // =========================================================
+    // REAL FILE & IMAGE UPLOAD HANDLING (PICKER + DRAG & DROP)
+    // =========================================================
+    function handleFileSelect(event) {
+      const files = Array.from(event.target.files || []);
+      processUploadedFiles(files);
+      event.target.value = '';
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+      document.getElementById('dropOverlay').classList.remove('hidden');
+    }
+
+    function handleDragLeave(event) {
+      if (event.currentTarget.contains(event.relatedTarget)) return;
+      document.getElementById('dropOverlay').classList.add('hidden');
+    }
+
+    function handleFileDrop(event) {
+      event.preventDefault();
+      document.getElementById('dropOverlay').classList.add('hidden');
+      const files = Array.from(event.dataTransfer.files || []);
+      processUploadedFiles(files);
+    }
+
+    function processUploadedFiles(files) {
+      if (!files.length) return;
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          stagedFiles.push({
+            id: 'att_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+            name: file.name,
+            size: formatFileSize(file.size),
+            type: file.type || 'application/octet-stream',
+            isImage: (file.type || '').startsWith('image/'),
+            dataUrl: e.target.result
+          });
+          renderStagedFiles();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function attachSampleAsset() {
+      const samples = [
+        {
+          name: 'Ikaze_Project_Roadmap_2026.csv',
+          size: '48 KB',
+          type: 'text/csv',
+          isImage: false,
+          dataUrl: 'data:text/csv;charset=utf-8,' + encodeURIComponent('Milestone,Owner,Status\nGroup Chat Launch,Alex Morgan,Completed\nFile Sharing Hub,Sarah Jenkins,Completed\nAdmin Analytics,Platform Admin,In Progress')
+        },
+        {
+          name: 'Community_Meeting_Notes.txt',
+          size: '12 KB',
+          type: 'text/plain',
+          isImage: false,
+          dataUrl: 'data:text/plain;charset=utf-8,' + encodeURIComponent('IKAZE GROUP WEEKLY SYNC\n- Open group creation is live for all members.\n- Upload documents, images, and CSVs directly into any group thread.')
+        }
+      ];
+      const pick = samples[Math.floor(Math.random() * samples.length)];
+      stagedFiles.push({
+        id: 'att_' + Date.now(),
+        ...pick
+      });
+      renderStagedFiles();
+      showToast(`Attached sample file: ${pick.name}`, 'info');
+    }
+
+    function renderStagedFiles() {
+      const bar = document.getElementById('stagedFilesBar');
+      if (stagedFiles.length === 0) {
+        bar.classList.add('hidden');
+        bar.innerHTML = '';
+        return;
+      }
+      bar.classList.remove('hidden');
+      bar.innerHTML = stagedFiles.map((f, idx) => `
+        <div class="inline-flex items-center gap-2 bg-white border border-indigo-200 rounded-xl px-3 py-1.5 text-xs shadow-2xs">
+          <span class="font-semibold text-indigo-700 truncate max-w-[160px]">${escapeHtml(f.name)}</span>
+          <span class="text-[10px] text-slate-400">(${f.size})</span>
+          <button type="button" onclick="removeStagedFile(${idx})" class="text-slate-400 hover:text-rose-600 font-bold ml-1">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function removeStagedFile(index) {
+      stagedFiles.splice(index, 1);
+      renderStagedFiles();
+    }
+
+    // =========================================================
+    // RIGHT DRAWER: MEMBERS, SHARED FILES & GROUP ADMIN TOOLS
+    // =========================================================
+    function toggleRightDrawer(forceTab) {
+      const drawer = document.getElementById('workspaceRightDrawer');
+      if (typeof forceTab === 'string') {
+        drawer.classList.remove('hidden');
+        setDrawerTab(forceTab);
+        return;
+      }
+      if (forceTab === false) {
+        drawer.classList.add('hidden');
+        return;
+      }
+      drawer.classList.toggle('hidden');
+    }
+
+    function setDrawerTab(tab) {
+      currentDrawerTab = tab;
+      ['members', 'files', 'manage'].forEach(t => {
+        const panel = document.getElementById('drawerPanel' + t.charAt(0).toUpperCase() + t.slice(1));
+        const btn = document.getElementById('drawerTab' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (panel) panel.classList.toggle('hidden', t !== tab);
+        if (btn) {
+          if (t === tab) {
+            btn.className = t === 'manage'
+              ? 'flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-amber-100 text-amber-900 shadow-2xs transition'
+              : 'flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold bg-white text-indigo-700 shadow-2xs transition';
+          } else {
+            btn.className = t === 'manage'
+              ? 'flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold text-amber-700 hover:bg-amber-50 transition'
+              : 'flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+          }
+        }
+      });
+    }
+
+    function renderRightDrawer(group) {
+      const creator = getUserById(group.creatorId);
+      const user = getCurrentUser();
+      const canManage = isGroupAdmin(group);
+
+      document.getElementById('drawerGroupDesc').textContent = group.description;
+      document.getElementById('drawerGroupCreator').textContent = creator.name;
+      document.getElementById('drawerMemberCount').textContent = group.members.length;
+
+      // Leave Group button visibility
+      document.getElementById('leaveGroupContainer').classList.toggle('hidden', !group.members.includes(user.id) || group.creatorId === user.id);
+
+      // Members List
+      document.getElementById('drawerMembersList').innerHTML = group.members.map(mId => {
+        const m = getUserById(mId);
+        const isGrpAdmin = mId === group.creatorId;
+        return `
+          <div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="relative">
+                <div class="w-8 h-8 rounded-full ${m.color} text-white text-xs font-bold flex items-center justify-center">${m.avatar}</div>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white absolute -bottom-0.5 -right-0.5"></span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-slate-900 truncate">${escapeHtml(m.name)}</p>
+                <p class="text-[10px] text-slate-400 truncate">${isGrpAdmin ? 'Group Admin' : escapeHtml(m.title)}</p>
+              </div>
+            </div>
+            ${isGrpAdmin ? `<span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">Admin</span>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      // Shared Files List
+      const allFiles = [];
+      group.messages.forEach(m => {
+        (m.attachments || []).forEach(att => {
+          allFiles.push({ ...att, senderName: getUserById(m.senderId).name, timestamp: m.timestamp });
+        });
+      });
+
+      const filesListEl = document.getElementById('drawerFilesList');
+      if (allFiles.length === 0) {
+        filesListEl.innerHTML = `<p class="text-xs text-slate-400 italic py-6 text-center">No files uploaded in this group yet.</p>`;
+      } else {
+        filesListEl.innerHTML = allFiles.map(f => `
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(f.name)}</p>
+              <p class="text-[10px] text-slate-400">By ${escapeHtml(f.senderName)} • ${f.size}</p>
+            </div>
+            <a href="${f.dataUrl}" download="${escapeHtml(f.name)}" class="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-indigo-600 hover:text-white text-slate-600 transition shrink-0" title="Download">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            </a>
+          </div>
+        `).join('');
+      }
+
+      // Manage Panel Data (for Group Admin & Platform Admin)
+      if (canManage) {
+        document.getElementById('managePinInput').value = group.pinnedNotice || '';
+        document.getElementById('manageMembersModerationList').innerHTML = group.members.map(mId => {
+          const m = getUserById(mId);
+          const isCreator = mId === group.creatorId;
+          return `
+            <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200/70">
+              <span class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(m.name)}</span>
+              ${isCreator
+                ? `<span class="text-[10px] font-bold text-indigo-600">Owner</span>`
+                : `<button onclick="removeMemberFromGroup('${mId}')" class="text-[11px] font-semibold text-rose-600 hover:text-rose-800">Remove</button>`
+              }
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function savePinnedNotice() {
+      const group = state.groups.find(g => g.id === activeGroupId);
+      if (!group) return;
+      group.pinnedNotice = document.getElementById('managePinInput').value.trim();
+      saveState();
+      renderWorkspace();
+      showToast('Group announcement updated!', 'success');
+    }
+
+    function clearPinnedNotice() {
+      const group = state.groups.find(g => g.id === activeGroupId);
+      if (!group) return;
+      group.pinnedNotice = '';
+      saveState();
+      renderWorkspace();
+      showToast('Pinned notice removed.', 'info');
+    }
+
+    function removeMemberFromGroup(memberId) {
+      const group = state.groups.find(g => g.id === activeGroupId);
+      if (!group || memberId === group.creatorId) return;
+      const target = getUserById(memberId);
+      group.members = group.members.filter(id => id !== memberId);
+      group.messages.push({
+        id: 'm_' + Date.now(),
+        senderId: getCurrentUser().id,
+        isSystem: true,
+        text: `${target.name} was removed from the group by an admin.`,
+        timestamp: formatCurrentTime(),
+        attachments: [],
+        reactions: {}
+      });
+      saveState();
+      syncChromeUI();
+      renderWorkspace();
+      showToast(`Removed ${target.name} from group.`, 'info');
+    }
+
+    // =========================================================
+    // CREATE, EDIT & DELETE GROUP CRUD
+    // =========================================================
+    function openGroupFormModal(editGroupId = null) {
+      const modal = document.getElementById('groupFormModal');
+      const titleEl = document.getElementById('groupFormTitle');
+      const submitBtn = document.getElementById('groupFormSubmitBtn');
+
+      if (editGroupId) {
+        const group = state.groups.find(g => g.id === editGroupId);
+        if (!group) return;
+        document.getElementById('editGroupIdInput').value = group.id;
+        document.getElementById('groupNameInput').value = group.name;
+        document.getElementById('groupCategoryInput').value = group.category;
+        document.getElementById('groupThemeInput').value = group.theme;
+        document.getElementById('groupDescInput').value = group.description;
+        titleEl.textContent = 'Edit Ikaze Group';
+        submitBtn.textContent = 'Save Changes';
+      } else {
+        document.getElementById('editGroupIdInput').value = '';
+        document.getElementById('groupNameInput').value = '';
+        document.getElementById('groupCategoryInput').value = 'Technology';
+        document.getElementById('groupThemeInput').value = 'from-indigo-600 to-violet-600';
+        document.getElementById('groupDescInput').value = '';
+        titleEl.textContent = 'Create New Ikaze Group';
+        submitBtn.textContent = 'Create & Open Group';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function saveGroupForm(event) {
+      event.preventDefault();
+      const editId = document.getElementById('editGroupIdInput').value;
+      const name = document.getElementById('groupNameInput').value.trim();
+      const category = document.getElementById('groupCategoryInput').value;
+      const theme = document.getElementById('groupThemeInput').value;
+      const description = document.getElementById('groupDescInput').value.trim();
+      const user = getCurrentUser();
+
+      if (!name || !description) return;
+
+      if (editId) {
+        const group = state.groups.find(g => g.id === editId);
+        if (group) {
+          group.name = name;
+          group.category = category;
+          group.theme = theme;
+          group.description = description;
+          saveState();
+          closeModal('groupFormModal');
+          syncChromeUI();
+          if (activeView === 'workspace' && activeGroupId === editId) {
+            renderWorkspace();
+          } else {
+            renderDirectory();
+          }
+          showToast(`Updated "${name}"`, 'success');
+        }
+      } else {
+        const newGroup = {
+          id: 'grp_' + Date.now(),
+          name,
+          category,
+          theme,
+          description,
+          creatorId: user.id,
+          createdAt: '2026-11-24',
+          pinnedNotice: `Welcome to ${name}! Created by ${user.name}.`,
+          members: [user.id],
+          messages: [
+            {
+              id: 'm_' + Date.now(),
+              senderId: user.id,
+              isSystem: true,
+              text: `${user.name} created "${name}". All members can join freely, chat, and upload files.`,
+              timestamp: formatCurrentTime(),
+              attachments: [],
+              reactions: {}
+            }
+          ]
+        };
+        state.groups.unshift(newGroup);
+        saveState();
+        closeModal('groupFormModal');
+        syncChromeUI();
+        showToast(`"${name}" is now live on Ikaze Group!`, 'success');
+        openGroupWorkspace(newGroup.id);
+      }
+    }
+
+    function deleteGroup(groupId) {
+      const group = state.groups.find(g => g.id === groupId);
+      if (!group) return;
+      if (!confirm(`Delete "${group.name}" permanently? All chat messages and shared files in this group will be removed.`)) {
+        return;
+      }
+      state.groups = state.groups.filter(g => g.id !== groupId);
+      saveState();
+      syncChromeUI();
+      showToast(`Deleted "${group.name}".`, 'info');
+      if (activeGroupId === groupId) {
+        activeGroupId = null;
+        openDirectoryView();
+      } else {
+        renderDirectory();
+      }
+    }
+
+    // =========================================================
+    // ADMIN FEEDBACK SYSTEM (STANDALONE USER & ALL USERS)
+    // =========================================================
+    function openFeedbackModal(defaultType = 'all') {
+      const radios = document.getElementsByName('feedbackTargetType');
+      radios.forEach(r => { r.checked = (r.value === defaultType); });
+
+      const select = document.getElementById('feedbackRecipientSelect');
+      const standaloneUsers = state.users.filter(u => u.role !== 'admin');
+      select.innerHTML = standaloneUsers.map(u => `
+        <option value="${u.id}">${escapeHtml(u.name)} (${escapeHtml(u.handle)} — ${escapeHtml(u.title)})</option>
+      `).join('');
+
+      document.getElementById('feedbackSubjectInput').value = '';
+      document.getElementById('feedbackBodyInput').value = '';
+      toggleFeedbackRecipientSelect();
+      document.getElementById('feedbackModal').classList.remove('hidden');
+    }
+
+    function toggleFeedbackRecipientSelect() {
+      const selected = document.querySelector('input[name="feedbackTargetType"]:checked').value;
+      document.getElementById('standaloneUserSelectWrapper').classList.toggle('hidden', selected !== 'single');
+    }
+
+    function submitAdminFeedback(event) {
+      event.preventDefault();
+      const targetType = document.querySelector('input[name="feedbackTargetType"]:checked').value;
+      const recipientId = targetType === 'all' ? 'all' : document.getElementById('feedbackRecipientSelect').value;
+      const subject = document.getElementById('feedbackSubjectInput').value.trim();
+      const body = document.getElementById('feedbackBodyInput').value.trim();
+
+      if (!subject || !body) return;
+
+      state.feedbacks.unshift({
+        id: 'fb_' + Date.now(),
+        targetType,
+        recipientId,
+        subject,
+        body,
+        timestamp: 'Nov 24, 2026 • ' + formatCurrentTime(),
+        readBy: [getCurrentUser().id]
+      });
+
+      saveState();
+      closeModal('feedbackModal');
+      syncChromeUI();
+
+      const targetLabel = targetType === 'all'
+        ? 'all Ikaze Group users'
+        : getUserById(recipientId).name;
+      showToast(`Feedback sent to ${targetLabel}!`, 'success');
+    }
+
+    function openInboxModal() {
+      const user = getCurrentUser();
+      const relevant = state.feedbacks.filter(fb =>
+        isPlatformAdmin() || fb.targetType === 'all' || fb.recipientId === user.id
+      );
+
+      // Mark as read for current user
+      relevant.forEach(fb => {
+        if (!fb.readBy.includes(user.id)) fb.readBy.push(user.id);
+      });
+      saveState();
+      syncChromeUI();
+
+      document.getElementById('inboxSubtitle').textContent = isPlatformAdmin()
+        ? 'Log of all platform broadcasts & direct standalone user feedback'
+        : `Messages & admin feedback for ${user.name}`;
+
+      const container = document.getElementById('inboxListContainer');
+      if (relevant.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">No admin feedback or announcements yet.</p>`;
+      } else {
+        container.innerHTML = relevant.map(fb => {
+          const isGlobal = fb.targetType === 'all';
+          const recipientName = isGlobal ? 'All Users (Broadcast)' : `Direct to ${getUserById(fb.recipientId).name}`;
+          return `
+            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${isGlobal ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}">
+                  ${escapeHtml(recipientName)}
+                </span>
+                <span class="text-[11px] text-slate-400">${escapeHtml(fb.timestamp)}</span>
+              </div>
+              <h4 class="text-xs sm:text-sm font-bold text-slate-900">${escapeHtml(fb.subject)}</h4>
+              <p class="text-xs text-slate-600 mt-1 leading-relaxed">${escapeHtml(fb.body)}</p>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('inboxModal').classList.remove('hidden');
+    }
+
+    // =========================================================
+    // UTILITIES: MODALS, EMOJIS, LIGHTBOX & TOASTS
+    // =========================================================
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function openMediaPreview(dataUrl, fileName) {
+      document.getElementById('previewImageEl').src = dataUrl;
+      document.getElementById('previewFileName').textContent = fileName;
+      const dl = document.getElementById('previewDownloadLink');
+      dl.href = dataUrl;
+      dl.download = fileName;
+      document.getElementById('mediaPreviewModal').classList.remove('hidden');
+    }
+
+    function toggleQuickEmojiBar() {
+      document.getElementById('quickEmojiPopover').classList.toggle('hidden');
+    }
+
+    function insertEmoji(emoji) {
+      const input = document.getElementById('chatInput');
+      input.value += emoji;
+      input.focus();
+      document.getElementById('quickEmojiPopover').classList.add('hidden');
+    }
+
+    function formatCurrentTime() {
+      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 KB';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const colors = {
+        success: 'bg-emerald-600 text-white',
+        amber: 'bg-amber-500 text-slate-950',
+        info: 'bg-slate-900 text-white'
+      };
+      const el = document.createElement('div');
+      el.className = `${colors[type] || colors.info} px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 transition-all duration-300`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+      }, 3000);
+    }
+
+    // Boot App
+    init();
+  </script>
+</body>
+</html>
