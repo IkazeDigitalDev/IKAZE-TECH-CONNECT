@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IKAZE CONNECT — Super Admin</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{--bg:#0a0c14;--pn:rgba(20,25,40,.78);--ln:rgba(255,255,255,.08);--mu:#8899bb;--bl:#6a9eff;--pu:#b07aff;--rd:#ff6b6b;--gr:#3ddc97;--am:#ffb432}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif}
+body{background:radial-gradient(ellipse at 15% 0,#1a1f3a,#0a0c14 60%);color:#fff;height:100vh;display:flex;overflow:hidden;font-size:15px}
+.h{display:none!important}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:rgba(100,150,255,.4);border-radius:8px}
+nav{width:220px;background:rgba(12,16,28,.9);border-right:1px solid var(--ln);padding:16px 10px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.logo{font-size:19px;font-weight:700;padding:6px 10px 2px;background:linear-gradient(135deg,var(--bl),var(--pu));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.tag{margin:0 10px 14px;font-size:11px;color:var(--am);font-weight:600;letter-spacing:.6px;text-transform:uppercase}
+nav button{display:flex;align-items:center;gap:10px;background:none;border:0;color:var(--mu);padding:11px 12px;border-radius:12px;cursor:pointer;font-size:14px;text-align:left}
+nav button:hover{background:rgba(255,255,255,.05);color:#c0d0ff}nav button.on{background:rgba(70,130,255,.15);color:var(--bl)}
+nav i,nav svg{width:18px;height:18px}.sp{flex:1}
+main{flex:1;overflow-y:auto;padding:24px 28px 60px}
+h1{font-size:24px;font-weight:600}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.card{background:var(--pn);border:1px solid var(--ln);border-radius:18px;padding:18px;backdrop-filter:blur(14px)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:16px}
+.st b{display:block;font-size:28px;margin-top:6px}.st span,.mu{color:var(--mu);font-size:13px}
+table{width:100%;border-collapse:collapse}th{font-size:12px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;text-align:left;padding:8px 10px}
+td{padding:10px;border-top:1px solid var(--ln);font-size:14px;vertical-align:middle}.wrap{overflow-x:auto}
+.b{background:rgba(70,130,255,.15);border:1px solid rgba(70,130,255,.3);color:#c0d0ff;padding:7px 12px;border-radius:10px;cursor:pointer;font-size:13px;margin:2px}
+.b:hover{background:rgba(70,130,255,.3)}.b.d{background:rgba(255,80,80,.12);border-color:rgba(255,80,80,.3);color:var(--rd)}.b.p{background:linear-gradient(135deg,#4a7aff,#8a5aff);border:0;color:#fff}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(255,255,255,.08)}
+.g{color:var(--gr);background:rgba(61,220,151,.12)}.r{color:var(--rd);background:rgba(255,80,80,.12)}.a{color:var(--am);background:rgba(255,180,50,.12)}
+.in,input,select,textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--ln);color:#fff;border-radius:10px;padding:10px 12px;font-size:14px;outline:none;margin:4px 0 10px}
+select option{background:#141928}input:focus,select:focus,textarea:focus{border-color:var(--bl)}label{font-size:12px;color:var(--mu)}
+.seg{display:inline-flex;background:rgba(255,255,255,.05);border-radius:12px;padding:3px;margin-bottom:12px}.seg button{background:none;border:0;color:var(--mu);padding:7px 16px;border-radius:9px;cursor:pointer}.seg .on{background:rgba(70,130,255,.25);color:#fff}
+.av{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin-right:8px;vertical-align:middle;background:rgba(106,158,255,.2);color:var(--bl)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--ln)}
+.two{display:grid;grid-template-columns:300px 1fr;gap:14px;height:calc(100vh - 170px)}.two>div{overflow-y:auto}
+.ci{padding:10px;border-radius:12px;cursor:pointer}.ci:hover,.ci.on{background:rgba(70,130,255,.15)}
+.msg{padding:9px 12px;margin:6px 0;border-radius:12px;background:rgba(255,255,255,.05);max-width:80%}.msg.ad{margin-left:auto;background:rgba(106,158,255,.18)}
+.bars{display:flex;align-items:flex-end;gap:10px;height:110px}.bars div{flex:1;text-align:center;font-size:11px;color:var(--mu)}.bars i{display:block;background:linear-gradient(var(--bl),var(--pu));border-radius:6px 6px 0 0;margin-bottom:4px;min-height:3px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.md{background:#141928;border:1px solid var(--ln);border-radius:20px;padding:22px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto}.md h2{margin-bottom:12px;font-size:19px}
+#toast{position:fixed;bottom:20px;right:20px;background:#1d2540;border:1px solid var(--bl);padding:12px 18px;border-radius:12px;z-index:99}
+#gate{position:fixed;inset:0;background:var(--bg);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px}
+@media(max-width:800px){nav{width:62px}nav span,.logo,.tag{display:none}.two{grid-template-columns:1fr;height:auto}main{padding:16px}}
+</style>
+</head>
+<body>
+<div id="gate"><div class="md"><h2 id="gt">Super Admin</h2><p class="mu" id="gd"></p><br><label>Passcode</label><input type="password" id="gp"><div id="gc" class="h"><label>Confirm passcode</label><input type="password" id="gp2"></div><button class="b p" id="gb" style="width:100%;padding:11px">Continue</button></div></div>
+<nav id="nav"></nav>
+<main id="main"></main>
+<div class="ov h" id="md"><div class="md"><h2 id="mt"></h2><div id="mb"></div><div style="display:flex;gap:8px;margin-top:8px"><button class="b p" id="mok">OK</button><button class="b" data-a="close">Close</button></div></div></div>
+<input type="file" id="fi" class="h"><input type="file" id="imp" class="h" accept=".json">
+<script>
+const DBN='IkazeConnectDemo',LS='nexushub_community_state_v1',PW='ikaze_admin_pass';
+let db,S={nx:{}},view='dash',src='ik',chat=null;
+const $=s=>document.querySelector(s);
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dt=t=>new Date(t).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+const ini=n=>String(n||'?').split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+const toast=m=>{const t=document.createElement('div');t.id='toast';t.textContent=m;document.body.append(t);setTimeout(()=>t.remove(),2200)};
+// ---------- IndexedDB (same schema as index.html) ----------
+const openDb=()=>new Promise((res,rej)=>{const r=indexedDB.open(DBN,1);r.onupgradeneeded=e=>{const d=e.target.result,mk=(n,k,i)=>{if(!d.objectStoreNames.contains(n)){const s=d.createObjectStore(n,{keyPath:k});if(i)s.createIndex('chatId','chatId',{unique:false})}};mk('users','uid');mk('messages','id',1);mk('preferences','key');mk('groups','id');mk('meetings','id');mk('files','id')};r.onsuccess=e=>{db=e.target.result;res()};r.onerror=()=>rej(r.error)});
+const rq=r=>new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const os=(s,m='readonly')=>db.transaction(s,m).objectStore(s);
+const has=s=>db.objectStoreNames.contains(s),all=s=>has(s)?rq(os(s).getAll()):Promise.resolve([]),put=(s,v)=>rq(os(s,'readwrite').put(v)),del=(s,k)=>rq(os(s,'readwrite').delete(k)),clr=s=>rq(os(s,'readwrite').clear());
+const saveNx=()=>localStorage.setItem(LS,JSON.stringify(S.nx));
+async function load(){
+ const us=await all('users'),l=(us.find(u=>u.uid==='__demo_users__')||{}).list||[];
+ S.users=us.filter(u=>!u.uid.startsWith('__'));l.forEach(x=>{if(!S.users.find(u=>u.uid===x.uid))S.users.push({...x})});
+ S.groups=await all('groups');S.meets=await all('meetings');S.files=await all('files');S.msgs=await all('messages');
+ try{S.nx=JSON.parse(localStorage.getItem(LS))}catch{}
+ S.nx=S.nx||{currentUserId:'admin1',users:[{id:'admin1',name:'Admin User',role:'admin',title:'Community Moderator',avatarBg:'bg-slate-900'}],groups:[],feedbacks:[]};
+ const pf=k=>has('preferences')?rq(os('preferences').get(k)):Promise.resolve(null);S.audit=(await pf('admin_audit'))?.list||[];S.sus=(await pf('admin_mod'))?.list||[];
+}
+const log=async a=>{S.audit.unshift({t:Date.now(),a});S.audit=S.audit.slice(0,200);try{await put('preferences',{key:'admin_audit',list:S.audit})}catch{}};
+const saveUser=async u=>{await put('users',u);const i=S.users.findIndex(x=>x.uid===u.uid);i<0?S.users.push(u):S.users[i]=u;
+ await put('users',{uid:'__demo_users__',list:S.users.map(x=>({uid:x.uid,name:x.name,email:x.email,profession:x.profession,avatar:x.avatar,color:x.color,online:x.online}))})};
+const saveSus=()=>put('preferences',{key:'admin_mod',list:S.sus});
+const un=id=>id==='__superadmin__'?'Super Admin':(S.users.find(u=>u.uid===id)||S.nx.users.find(u=>u.id===id)||{}).name||id;
+const chatTitle=c=>{if(c.startsWith('group_'))return '👥 '+((S.groups.find(g=>'group_'+g.id===c)||{}).name||c);return (c.match(/demo_[^_]+/g)||[c]).map(un).join(' ↔ ')};
+// ---------- Modal helpers ----------
+const closeM=()=>$('#md').classList.add('h');
+function modal(t,h,ok,lb='Save'){$('#mt').textContent=t;$('#mb').innerHTML=h;const b=$('#mok');b.textContent=lb;b.classList.toggle('h',!ok);b.onclick=async()=>{if(await ok()!==false)closeM()};$('#md').classList.remove('h');lucide.createIcons()}
+function form(t,fs,ok,lb){modal(t,fs.map(f=>`<label>${f.l}</label>`+(f.t==='select'?`<select id="f_${f.k}">${f.o.map(o=>`<option value="${esc(o[0])}" ${o[0]==f.v?'selected':''}>${esc(o[1])}</option>`).join('')}</select>`:f.t==='area'?`<textarea id="f_${f.k}" rows="3">${esc(f.v)}</textarea>`:`<input id="f_${f.k}" type="${f.t||'text'}" value="${esc(f.v)}">`)).join(''),async()=>{const d={};fs.forEach(f=>d[f.k]=$('#f_'+f.k).value.trim());return ok(d)},lb)}
+const ask=(m,fn)=>modal('Confirm',`<p>${m}</p>`,fn,'Confirm');
+const tbl=(h,r)=>`<div class="card wrap"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${h.length}" class="mu">Nothing here yet.</td></tr>`}</table></div>`;
+const hd=(t,a='')=>`<div class="top"><h1>${t}</h1><div>${a}</div></div>`;
+const btn=(a,id,l,c='')=>`<button class="b ${c}" data-a="${a}" data-id="${esc(id)}">${l}</button>`;
+const seg=()=>`<div class="seg"><button class="${src==='ik'?'on':''}" data-a="src" data-id="ik">IKAZE Connect</button><button class="${src==='nx'?'on':''}" data-a="src" data-id="nx">NexusHub</button></div> <input placeholder="Search…" oninput="flt(this.value)" style="max-width:240px;margin-left:10px">`;
+const flt=v=>document.querySelectorAll('tbody tr,table tr+tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(v.toLowerCase())?'':'none');
+// ---------- Views ----------
+const NAV=[['dash','layout-dashboard','Dashboard'],['users','users','Users'],['groups','users-round','Groups'],['chats','messages-square','Chats'],['meets','video','Meetings'],['files','paperclip','Files'],['ann','megaphone','Announcements'],['sys','settings','System & Audit']];
+const V={
+dash(){const days=[...Array(7)].map((_,i)=>{const d=new Date(Date.now()-(6-i)*864e5);return{l:d.toLocaleDateString([],{weekday:'short'}),n:S.msgs.filter(m=>new Date(m.timestamp).toDateString()===d.toDateString()).length}}),mx=Math.max(1,...days.map(d=>d.n));
+ const chats=new Set(S.msgs.map(m=>m.chatId)).size,sz=(S.files.reduce((a,f)=>a+(f.size||0),0)/1024).toFixed(1),st=(l,v)=>`<div class="card st"><span>${l}</span><b>${v}</b></div>`;
+ return hd('Dashboard',btn('reload','','↻ Refresh'))+`<div class="grid">${st('IKAZE users',S.users.length)}${st('NexusHub users',S.nx.users.length)}${st('Online now',S.users.filter(u=>u.online).length)}${st('Suspended',S.sus.length)}${st('Groups',S.groups.length+S.nx.groups.length)}${st('Conversations',chats)}${st('Messages',S.msgs.length)}${st('Meetings',S.meets.length)}${st('Files',S.files.length+' · '+sz+' KB')}${st('Announcements',S.nx.feedbacks.length)}</div>
+ <div class="card" style="margin-bottom:16px"><span class="mu">Messages · last 7 days</span><div class="bars" style="margin-top:12px">${days.map(d=>`<div><i style="height:${d.n/mx*90}px"></i>${d.n}<br>${d.l}</div>`).join('')}</div></div>
+ <div class="card"><span class="mu">Recent admin activity</span>${S.audit.slice(0,6).map(a=>`<div class="row"><span>${esc(a.a)}</span><span class="mu">${dt(a.t)}</span></div>`).join('')||'<p class="mu" style="margin-top:8px">No activity yet.</p>'}</div>`},
+users(){const n=src==='nx';
+ return hd('Users',btn('uNew','','+ Add user','p'))+seg()+(n?tbl(['Name','Title','Role',''],S.nx.users.map(u=>[`<span class="av">${ini(u.name)}</span>${esc(u.name)}`,esc(u.title),u.role==='admin'?'<span class="pill a">★ Admin</span>':'<span class="pill">Member</span>',btn('uEdit',u.id,'Edit')+btn('uRole',u.id,u.role==='admin'?'Demote':'Make admin')+btn('uDel',u.id,'Delete','d')])):
+ tbl(['Name','Email','Profession','Status',''],S.users.map(u=>[`<span class="av" style="color:${u.color||'#6a9eff'}">${esc(u.avatar||ini(u.name))}</span>${esc(u.name)}`,esc(u.email),esc(u.profession),S.sus.includes(u.uid)?'<span class="pill r">Suspended</span>':u.online?'<span class="pill g">Online</span>':'<span class="pill">Offline</span>',btn('uEdit',u.uid,'Edit')+btn('uSus',u.uid,S.sus.includes(u.uid)?'Reinstate':'Suspend')+btn('uLogin',u.uid,'Login as')+btn('uDel',u.uid,'Delete','d')])))},
+groups(){const n=src==='nx',L=n?S.nx.groups:S.groups;
+ return hd('Groups',btn('gNew','','+ New group','p'))+seg()+tbl(['Group','Description','Members','Created',''],L.map(g=>[`<b>${esc(g.name)}</b>${g.category?`<br><span class="mu">${esc(g.category)}</span>`:''}`,`<span class="mu">${esc((g.description||'').slice(0,70))}</span>`,g.members.length,esc((g.createdAt||'').slice(0,10)),btn('gMem',g.id,'Members')+(n?'':btn('gChat',g.id,'Chat'))+btn('gEdit',g.id,'Edit')+btn('gDel',g.id,'Delete','d')]))},
+chats(){const by={};S.msgs.forEach(m=>(by[m.chatId]=by[m.chatId]||[]).push(m));Object.values(by).forEach(a=>a.sort((x,y)=>new Date(x.timestamp)-new Date(y.timestamp)));
+ const ids=Object.keys(by).sort((a,b)=>new Date(by[b].at(-1).timestamp)-new Date(by[a].at(-1).timestamp)),ms=chat&&by[chat]||[];
+ return hd('Chats',btn('cBc','','📣 Broadcast to all groups','p'))+`<div class="two"><div class="card"><input placeholder="Search conversations…" oninput="document.querySelectorAll('.ci').forEach(e=>e.style.display=e.textContent.toLowerCase().includes(this.value.toLowerCase())?'':'none')">${ids.map(c=>`<div class="ci ${c===chat?'on':''}" data-a="cOpen" data-id="${esc(c)}"><b>${esc(chatTitle(c))}</b><br><span class="mu">${esc(by[c].at(-1).text.slice(0,40))} · ${by[c].length} msgs</span></div>`).join('')||'<p class="mu">No conversations.</p>'}</div>
+ <div class="card">${chat?`<div class="top"><b>${esc(chatTitle(chat))}</b>${btn('cClr',chat,'Clear chat','d')}</div>${ms.map(m=>`<div class="msg ${m.senderId==='__superadmin__'?'ad':''}"><span class="mu">${esc(m.senderName||un(m.senderId))} · ${dt(m.timestamp)}${m.edited?' · edited':''}</span><br>${esc(m.text)}<br>${btn('mEdit',m.id,'Edit')}${btn('mDel',m.id,'Delete','d')}</div>`).join('')}<div style="display:flex;gap:8px;margin-top:12px"><input id="adm" placeholder="Send as Super Admin…" style="margin:0"><button class="b p" data-a="cSend">Send</button></div>`:'<p class="mu">Select a conversation to read, moderate or reply.</p>'}</div></div>`},
+meets(){return hd('Meetings',btn('meNew','','+ Schedule','p'))+tbl(['Title','Host','When','Description',''],S.meets.map(m=>[`<b>${esc(m.title)}</b>`,esc(un(m.host)),dt(m.dateTime),`<span class="mu">${esc(m.description)}</span>`,btn('meEdit',m.id,'Edit')+btn('meDel',m.id,'Delete','d')]))},
+files(){return hd('Files',btn('fUp','','+ Upload','p'))+tbl(['Name','Size','Uploaded by','Date',''],S.files.map(f=>[esc(f.name),(f.size/1024).toFixed(1)+' KB',esc(un(f.uploadedBy)),dt(f.uploadedAt),btn('fDl',f.id,'Download')+btn('fDel',f.id,'Delete','d')]))},
+ann(){return hd('Announcements (NexusHub)',btn('aNew','','+ New announcement','p'))+tbl(['Subject','To','Message','Sent',''],S.nx.feedbacks.map(f=>[`<b>${esc(f.subject)}</b>`,f.recipientId==='ALL'?'<span class="pill a">Everyone</span>':esc(un(f.recipientId)),`<span class="mu">${esc(f.body.slice(0,80))}</span>`,esc(f.timestamp),btn('aDel',f.id,'Delete','d')]))},
+sys(){return hd('System & Audit')+`<div class="card" style="margin-bottom:16px"><div class="row" style="border:0"><span>Backup / restore every store (IKAZE + NexusHub)</span><span>${btn('exp','','Export JSON')}${btn('imp','','Import JSON')}</span></div>
+ <div class="row" style="border:0"><span>Change super admin passcode</span>${btn('pw','','Change')}</div>
+ <div class="row" style="border:0"><span>Delete all messages</span>${btn('wipe','msgs','Wipe chats','d')}</div>
+ <div class="row" style="border:0"><span>Reset IKAZE data (users, groups, chats, meetings, files)</span>${btn('wipe','ik','Reset','d')}</div>
+ <div class="row" style="border:0"><span>Reset NexusHub data</span>${btn('wipe','nx','Reset','d')}</div></div>`+tbl(['When','Action'],S.audit.map(a=>[dt(a.t),esc(a.a)]))}
+};
+function render(){$('#nav').innerHTML=`<div class="logo">IKAZE CONNECT</div><div class="tag">★ Super Admin</div>`+NAV.map(n=>`<button class="${view===n[0]?'on':''}" data-a="go" data-id="${n[0]}"><i data-lucide="${n[1]}"></i><span>${n[2]}</span></button>`).join('')+`<div class="sp"></div><button data-a="out"><i data-lucide="log-out"></i><span>Sign out</span></button>`;
+ $('#main').innerHTML=V[view]();lucide.createIcons()}
+const refresh=async()=>{await load();render()};
+// ---------- Actions ----------
+const A={
+close:closeM,go:id=>{view=id;chat=null;render()},src:id=>{src=id;render()},reload:()=>refresh().then(()=>toast('Refreshed')),
+out:()=>{sessionStorage.removeItem('adm_ok');location.reload()},
+uNew(){src==='nx'?form('Add NexusHub user',[{k:'name',l:'Name'},{k:'title',l:'Title'},{k:'role',l:'Role',t:'select',o:[['member','Member'],['admin','Admin']],v:'member'}],async d=>{if(!d.name)return false;S.nx.users.push({id:'u'+Date.now(),name:d.name,title:d.title,role:d.role,avatarBg:'bg-indigo-600'});saveNx();await log('Added NexusHub user '+d.name);render()}):
+ form('Add IKAZE user',[{k:'name',l:'Name'},{k:'email',l:'Email',t:'email'},{k:'profession',l:'Profession'}],async d=>{if(!d.name||!d.email)return false;if(S.users.find(u=>u.email===d.email)){toast('Email already used');return false}
+ await saveUser({uid:'demo_'+Date.now(),name:d.name,email:d.email,profession:d.profession||'Member',avatar:ini(d.name),color:'#4a7aff',online:false,onboardingCompleted:true,bio:'',joined:new Date().toISOString()});await log('Added user '+d.name);render()})},
+uEdit(id){if(src==='nx'){const u=S.nx.users.find(x=>x.id===id);form('Edit user',[{k:'name',l:'Name',v:u.name},{k:'title',l:'Title',v:u.title}],async d=>{if(!d.name)return false;Object.assign(u,d);saveNx();await log('Edited user '+u.name);render()})}
+ else{const u=S.users.find(x=>x.uid===id);form('Edit user',[{k:'name',l:'Name',v:u.name},{k:'email',l:'Email',v:u.email},{k:'profession',l:'Profession',v:u.profession},{k:'bio',l:'Bio',t:'area',v:u.bio||''}],async d=>{if(!d.name)return false;Object.assign(u,d,{avatar:ini(d.name)});await saveUser(u);await log('Edited user '+u.name);render()})}},
+async uRole(id){const u=S.nx.users.find(x=>x.id===id);u.role=u.role==='admin'?'member':'admin';saveNx();await log(u.name+' is now '+u.role);render()},
+async uSus(id){const i=S.sus.indexOf(id);i<0?S.sus.push(id):S.sus.splice(i,1);await saveSus();await log((i<0?'Suspended ':'Reinstated ')+un(id));render()},
+uLogin(id){localStorage.setItem('ikaze_session_uid',id);log('Impersonated '+un(id));window.open('index.html','_blank')},
+uDel(id){ask('Delete <b>'+esc(un(id))+'</b>? They will also be removed from all groups.',async()=>{if(src==='nx'){S.nx.users=S.nx.users.filter(u=>u.id!==id);S.nx.groups.forEach(g=>g.members=g.members.filter(m=>m!==id));saveNx()}
+ else{await del('users',id);S.users=S.users.filter(u=>u.uid!==id);await put('users',{uid:'__demo_users__',list:S.users.map(x=>({uid:x.uid,name:x.name,email:x.email,profession:x.profession,avatar:x.avatar,color:x.color,online:x.online}))});for(const g of S.groups){g.members=g.members.filter(m=>m!==id);await put('groups',g)}}
+ await log('Deleted user '+id);render()})},
+gNew(){const n=src==='nx';form('New group',[{k:'name',l:'Name'},...(n?[{k:'category',l:'Category'}]:[]),{k:'description',l:'Description',t:'area'}],async d=>{if(!d.name)return false;const g={id:(n?'g':'grp_')+Date.now(),name:d.name,description:d.description,members:[],createdAt:new Date().toISOString().slice(0,10),...(n?{category:d.category||'General',creatorId:'admin1',theme:'from-indigo-500 to-purple-600'}:{})};n?(S.nx.groups.push(g),saveNx()):(await put('groups',g),S.groups.push(g));await log('Created group '+d.name);render()})},
+gEdit(id){const n=src==='nx',g=(n?S.nx.groups:S.groups).find(x=>x.id===id);form('Edit group',[{k:'name',l:'Name',v:g.name},...(n?[{k:'category',l:'Category',v:g.category}]:[]),{k:'description',l:'Description',t:'area',v:g.description}],async d=>{if(!d.name)return false;Object.assign(g,d);n?saveNx():await put('groups',g);await log('Edited group '+g.name);render()})},
+gDel(id){const n=src==='nx',g=(n?S.nx.groups:S.groups).find(x=>x.id===id);ask('Delete group <b>'+esc(g.name)+'</b>'+(n?'':' and all of its messages')+'?',async()=>{if(n){S.nx.groups=S.nx.groups.filter(x=>x.id!==id);saveNx()}else{await del('groups',id);S.groups=S.groups.filter(x=>x.id!==id);for(const m of S.msgs.filter(m=>m.chatId==='group_'+id))await del('messages',m.id);S.msgs=S.msgs.filter(m=>m.chatId!=='group_'+id)}await log('Deleted group '+g.name);render()})},
+gChat(id){view='chats';chat='group_'+id;render()},
+gMem(id){const n=src==='nx',g=(n?S.nx.groups:S.groups).find(x=>x.id===id),pool=(n?S.nx.users.map(u=>[u.id,u.name]):S.users.map(u=>[u.uid,u.name])).filter(p=>!g.members.includes(p[0]));
+ modal('Members · '+g.name,g.members.map(m=>`<div class="row"><span>${esc(un(m))}</span>${btn('mRm',id+'|'+m,'Remove','d')}</div>`).join('')||'<p class="mu">No members yet.</p>',null);
+ $('#mb').insertAdjacentHTML('beforeend',`<label style="display:block;margin-top:12px">Add member</label><div style="display:flex;gap:6px"><select id="addm">${pool.map(p=>`<option value="${esc(p[0])}">${esc(p[1])}</option>`).join('')}</select>${btn('mAdd',id,'Add','p')}</div>`)},
+async mAdd(id){const n=src==='nx',g=(n?S.nx.groups:S.groups).find(x=>x.id===id),v=$('#addm')?.value;if(!v)return;g.members.push(v);n?saveNx():await put('groups',g);await log(un(v)+' added to '+g.name);A.gMem(id);render()},
+async mRm(x){const[id,m]=x.split('|'),n=src==='nx',g=(n?S.nx.groups:S.groups).find(y=>y.id===id);g.members=g.members.filter(y=>y!==m);n?saveNx():await put('groups',g);await log(un(m)+' removed from '+g.name);A.gMem(id);render()},
+cOpen(id){chat=id;render()},
+async cSend(){const t=$('#adm').value.trim();if(!t)return;const m={id:chat+'_'+Date.now()+'_adm',chatId:chat,senderId:'__superadmin__',senderName:'Super Admin',text:t,timestamp:new Date().toISOString(),edited:null,reactions:[]};await put('messages',m);S.msgs.push(m);await log('Sent message in '+chatTitle(chat));render()},
+cBc(){form('Broadcast to every group',[{k:'t',l:'Message',t:'area'}],async d=>{if(!d.t)return false;for(const g of S.groups){const m={id:'group_'+g.id+'_'+Date.now()+'_bc',chatId:'group_'+g.id,senderId:'__superadmin__',senderName:'Super Admin',text:d.t,timestamp:new Date().toISOString(),edited:null,reactions:[]};await put('messages',m);S.msgs.push(m)}await log('Broadcast to '+S.groups.length+' groups');render()},'Send')},
+cClr(id){ask('Delete every message in this conversation?',async()=>{for(const m of S.msgs.filter(m=>m.chatId===id))await del('messages',m.id);S.msgs=S.msgs.filter(m=>m.chatId!==id);await log('Cleared '+chatTitle(id));chat=null;render()})},
+mEdit(id){const m=S.msgs.find(x=>x.id===id);form('Edit message',[{k:'t',l:'Text',t:'area',v:m.text}],async d=>{if(!d.t)return false;m.text=d.t;m.edited=new Date().toISOString();await put('messages',m);await log('Edited a message');render()})},
+mDel(id){ask('Delete this message?',async()=>{await del('messages',id);S.msgs=S.msgs.filter(m=>m.id!==id);await log('Deleted a message');render()})},
+meNew(){A.meEdit()},
+meEdit(id){const m=S.meets.find(x=>x.id===id)||{};form(id?'Edit meeting':'Schedule meeting',[{k:'title',l:'Title',v:m.title||''},{k:'description',l:'Description',v:m.description||''},{k:'time',l:'Date & time',t:'datetime-local',v:m.dateTime?new Date(new Date(m.dateTime)-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16):''}],async d=>{if(!d.title||!d.time)return false;const n={...m,id:m.id||'meet_'+Date.now(),title:d.title,description:d.description,dateTime:new Date(d.time).toISOString(),host:m.host||'__superadmin__',createdAt:m.createdAt||new Date().toISOString()};await put('meetings',n);S.meets=S.meets.filter(x=>x.id!==n.id).concat(n);await log('Saved meeting '+d.title);render()})},
+meDel(id){ask('Delete this meeting?',async()=>{await del('meetings',id);S.meets=S.meets.filter(m=>m.id!==id);await log('Deleted a meeting');render()})},
+fUp(){$('#fi').click()},
+fDl(id){const f=S.files.find(x=>x.id===id);if(!f.data)return toast('No file data stored');const a=document.createElement('a');a.href=f.data;a.download=f.name;a.click()},
+fDel(id){ask('Delete this file?',async()=>{await del('files',id);S.files=S.files.filter(f=>f.id!==id);await log('Deleted a file');render()})},
+aNew(){form('New announcement',[{k:'to',l:'Send to',t:'select',o:[['ALL','Everyone'],...S.nx.users.filter(u=>u.role!=='admin').map(u=>[u.id,u.name])]},{k:'subject',l:'Subject'},{k:'body',l:'Message',t:'area'}],async d=>{if(!d.subject||!d.body)return false;const n=new Date();S.nx.feedbacks.unshift({id:'f_'+Date.now(),recipientId:d.to,senderName:'Super Admin',subject:d.subject,body:d.body,timestamp:n.toLocaleDateString('en-US',{month:'short',day:'numeric'})+', '+n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),readBy:[]});saveNx();await log('Announcement: '+d.subject);render()},'Send')},
+aDel(id){ask('Delete this announcement?',async()=>{S.nx.feedbacks=S.nx.feedbacks.filter(f=>f.id!==id);saveNx();await log('Deleted an announcement');render()})},
+async exp(){const j={exportedAt:new Date().toISOString(),ikaze:{users:await all('users'),groups:S.groups,meetings:S.meets,files:S.files,messages:S.msgs},nexus:S.nx},a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(j)],{type:'application/json'}));a.download='ikaze-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();await log('Exported backup')},
+imp(){$('#imp').click()},
+pw(){form('Change passcode',[{k:'p',l:'New passcode (min 6 chars)',t:'password'}],async d=>{if(d.p.length<6){toast('Too short');return false}localStorage.setItem(PW,await hash(d.p));await log('Passcode changed');toast('Passcode updated')})},
+wipe(w){ask(w==='msgs'?'Delete ALL messages?':w==='ik'?'Reset ALL IKAZE data? Cannot be undone.':'Reset ALL NexusHub data?',async()=>{if(w==='nx')localStorage.removeItem(LS);else for(const s of w==='msgs'?['messages']:['users','messages','groups','meetings','files'])await clr(s);await log('Wiped: '+w);await refresh()})}
+};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b&&A[b.dataset.a])A[b.dataset.a](b.dataset.id,b)});
+$('#fi').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{const o={id:'file_'+Date.now(),name:f.name,size:f.size,type:f.type,data:r.result,uploadedAt:new Date().toISOString(),uploadedBy:'__superadmin__'};await put('files',o);S.files.push(o);await log('Uploaded '+f.name);render()};r.readAsDataURL(f);e.target.value=''};
+$('#imp').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{try{const j=JSON.parse(r.result),k=j.ikaze||{};for(const[s,a]of[['users',k.users],['groups',k.groups],['meetings',k.meetings],['files',k.files],['messages',k.messages]])for(const x of a||[])await put(s,x);if(j.nexus){S.nx=j.nexus;saveNx()}await log('Imported backup');await refresh();toast('Backup imported')}catch{toast('Invalid backup file')}};r.readAsText(f);e.target.value=''};
+// ---------- Auth gate ----------
+async function hash(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch{let h=5381;for(const c of s)h=(h*33^c.charCodeAt(0))>>>0;return'x'+h}}
+const STORES=['users','messages','preferences','groups','meetings','files'];
+async function boot(){await openDb();$('#gate').classList.add('h');const miss=STORES.filter(x=>!has(x));
+ try{await load()}catch(e){console.error(e)}render();
+ if(miss.length)modal('Database needs repair',`<p>The IKAZE database in this browser was created by an older version and is missing: <b>${miss.join(', ')}</b>. The panel is read-only until it is repaired.</p><p class="mu" style="margin-top:8px">Repair deletes the old demo database and recreates it with every table (demo data is re-seeded when you reopen index.html). Close other tabs of the app first.</p>`,async()=>{db.close();await new Promise(r=>{const q=indexedDB.deleteDatabase(DBN);q.onsuccess=q.onerror=q.onblocked=()=>r()});await openDb();await load();render();toast('Database repaired')},'Repair now')}
+const first=!localStorage.getItem(PW);
+if(first){$('#gt').textContent='Create Super Admin passcode';$('#gd').textContent='First launch: choose a passcode to protect this panel.';$('#gc').classList.remove('h')}
+else{$('#gt').textContent='Super Admin sign in';$('#gd').textContent='Enter your passcode to manage the whole platform.'}
+$('#gb').onclick=async()=>{const p=$('#gp').value;if(first){if(p.length<6)return toast('Min 6 characters');if(p!==$('#gp2').value)return toast('Passcodes do not match');localStorage.setItem(PW,await hash(p))}
+ else if(await hash(p)!==localStorage.getItem(PW))return toast('Wrong passcode');sessionStorage.setItem('adm_ok','1');boot()};
+$('#gt').textContent+=' · build 4';
+$('#gp').onkeydown=e=>{if(e.key==='Enter')$('#gb').click()};
+if(sessionStorage.getItem('adm_ok'))boot();
+</script>
+</body>
+</html>
